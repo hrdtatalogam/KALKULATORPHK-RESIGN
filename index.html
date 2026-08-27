@@ -336,22 +336,30 @@
 
     <div id="admin-reasons" class="card">
       <h2>Alasan PHK &amp; Faktor Pengali</h2>
-      <p style="font-size:12px;color:var(--muted);margin:-6px 0 6px;">Kalau ada update aturan ketenagakerjaan atau alasan PHK baru, edit/tambah baris di sini. Centang "Pakai Uang Pisah" untuk alasan yang tidak dapat Pesangon/Penghargaan menurut UU (misal kesalahan berat).</p>
+      <p style="font-size:12px;color:var(--muted);margin:-6px 0 6px;">Kalau ada update aturan ketenagakerjaan atau alasan PHK baru, edit/tambah baris di sini. Centang "Pakai Uang Pisah" untuk alasan yang tidak dapat Pesangon/Penghargaan menurut UU (misal kesalahan berat) — lalu pilih tabel Uang Pisah mana yang dipakai.</p>
       <table class="edit-table">
-        <thead><tr><th style="width:38%;">Label Alasan</th><th>UP (×)</th><th>UPMK (×)</th><th>Pakai Uang Pisah</th><th></th></tr></thead>
+        <thead><tr><th style="width:30%;">Label Alasan</th><th>UP (×)</th><th>UPMK (×)</th><th>Pakai Uang Pisah</th><th style="width:16%;">Sumber Uang Pisah</th><th></th></tr></thead>
         <tbody id="reasonsRows"></tbody>
       </table>
       <button class="add-row-btn" id="addReasonRow">+ Tambah alasan</button>
     </div>
 
     <div id="admin-pisah" class="card" style="display:none;">
-      <h2>Tabel Uang Pisah</h2>
-      <p style="font-size:12px;color:var(--muted);margin:-6px 0 6px;">Dipakai bersama oleh tab PHK (alasan "Pakai Uang Pisah") dan tab Resign. Nominal ini kebijakan Peraturan Perusahaan kamu, bukan ketentuan pemerintah.</p>
+      <h2>Tabel Uang Pisah — Umum</h2>
+      <p style="font-size:12px;color:var(--muted);margin:-6px 0 6px;">Dipakai oleh tab Resign, dan alasan PHK mana pun yang di atas diset sumbernya ke "Umum". Nominal ini kebijakan Peraturan Perusahaan kamu, bukan ketentuan pemerintah.</p>
       <table class="edit-table">
         <thead><tr><th>Dari (th)</th><th>Sampai (th)</th><th>Bulan Upah</th><th></th></tr></thead>
         <tbody id="pisahRowsAdmin"></tbody>
       </table>
       <button class="add-row-btn" id="addPisahRowAdmin">+ Tambah baris</button>
+
+      <h2 style="margin-top:26px;">Tabel Uang Pisah — Pelanggaran Mendesak</h2>
+      <p style="font-size:12px;color:var(--muted);margin:-6px 0 6px;">Tabel terpisah, khusus dipakai untuk alasan PHK yang sumbernya diset ke "Mendesak" (biasanya kesalahan berat/pelanggaran mendesak) — sesuai PP perusahaan kamu, bisa beda nominal dari tabel umum di atas.</p>
+      <table class="edit-table">
+        <thead><tr><th>Dari (th)</th><th>Sampai (th)</th><th>Bulan Upah</th><th></th></tr></thead>
+        <tbody id="pisahRowsMendesakAdmin"></tbody>
+      </table>
+      <button class="add-row-btn" id="addPisahRowMendesakAdmin">+ Tambah baris</button>
     </div>
 
     <div id="admin-cl-phk" class="card" style="display:none;">
@@ -431,32 +439,36 @@ function computePPhFinal(bruto, npwpStatus){
   tiersDef.forEach(t=>{ if(bruto > t.min){ tax += (Math.min(bruto,t.max)-t.min) * t.rate * mult; } });
   return tax;
 }
-function getPisahMonths(years){
-  for(const row of state.pisahRows){ if(years >= row.from && years < row.to) return row.months; }
+function getPisahMonths(years, rows){
+  const table = rows || state.pisahRows;
+  for(const row of table){ if(years >= row.from && years < row.to) return row.months; }
   return 0;
 }
 
 // ---------------- STATE ----------------
 let state = {
   reasonsPHK: [
-    {label:'Efisiensi karena perusahaan rugi', up:0.5, upmk:1, usesPisah:false},
-    {label:'Perusahaan tutup karena rugi terus-menerus', up:0.5, upmk:1, usesPisah:false},
-    {label:'Perusahaan pailit', up:0.5, upmk:1, usesPisah:false},
-    {label:'Force majeure yang menyebabkan tutup', up:0.5, upmk:1, usesPisah:false},
-    {label:'Pengambilalihan, karyawan tidak bersedia lanjut', up:0.5, upmk:1, usesPisah:false},
-    {label:'Pelanggaran PK/PP/PKB (sudah SP1, SP2, SP3)', up:0.5, upmk:1, usesPisah:false},
-    {label:'Force majeure yang tidak menyebabkan tutup', up:0.75, upmk:1, usesPisah:false},
-    {label:'Efisiensi untuk mencegah kerugian', up:1, upmk:1, usesPisah:false},
-    {label:'Perusahaan tutup bukan karena rugi', up:1, upmk:1, usesPisah:false},
-    {label:'Penggabungan/peleburan, tidak bersedia lanjut', up:1, upmk:1, usesPisah:false},
-    {label:'Pengambilalihan perusahaan', up:1, upmk:1, usesPisah:false},
-    {label:'Mengundurkan diri krn pelanggaran pengusaha (Psl 36 huruf g)', up:1, upmk:1, usesPisah:false},
-    {label:'Karyawan memasuki usia pensiun', up:1.75, upmk:1, usesPisah:false},
-    {label:'Sakit berkepanjangan/cacat akibat kecelakaan kerja >12 bulan', up:2, upmk:1, usesPisah:false},
-    {label:'Karyawan meninggal dunia', up:2, upmk:1, usesPisah:false},
-    {label:'Pelanggaran mendesak / kesalahan berat', up:0, upmk:0, usesPisah:true}
+    {label:'Efisiensi karena perusahaan rugi', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Perusahaan tutup karena rugi terus-menerus', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Perusahaan pailit', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Force majeure yang menyebabkan tutup', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Pengambilalihan, karyawan tidak bersedia lanjut', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Pelanggaran PK/PP/PKB (sudah SP1, SP2, SP3)', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Force majeure yang tidak menyebabkan tutup', up:0.75, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Efisiensi untuk mencegah kerugian', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Perusahaan tutup bukan karena rugi', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Penggabungan/peleburan, tidak bersedia lanjut', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Pengambilalihan perusahaan', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Mengundurkan diri krn pelanggaran pengusaha (Psl 36 huruf g)', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Karyawan memasuki usia pensiun', up:1.75, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Sakit berkepanjangan/cacat akibat kecelakaan kerja >12 bulan', up:2, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Karyawan meninggal dunia', up:2, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Pelanggaran mendesak / kesalahan berat', up:0, upmk:0, usesPisah:true, pisahSource:'mendesak'}
   ],
   pisahRows: [
+    {from:1, to:3, months:1}, {from:3, to:6, months:2}, {from:6, to:9, months:3}, {from:9, to:99, months:4}
+  ],
+  pisahRowsMendesak: [
     {from:1, to:3, months:1}, {from:3, to:6, months:2}, {from:6, to:9, months:3}, {from:9, to:99, months:4}
   ],
   checklistPHK: [
@@ -524,7 +536,7 @@ async function saveState(){
   });
   try{
     localStorage.setItem('phk-resign-state', JSON.stringify({
-      reasonsPHK: state.reasonsPHK, pisahRows: state.pisahRows,
+      reasonsPHK: state.reasonsPHK, pisahRows: state.pisahRows, pisahRowsMendesak: state.pisahRowsMendesak,
       checklistPHK: state.checklistPHK, checklistResign: state.checklistResign,
       phkClState: state.phkClState, resignClState: state.resignClState, formData
     }));
@@ -546,6 +558,12 @@ function renderReasonsAdmin(){
       <td><input type="number" step="0.05" value="${r.up}" data-idx="${idx}" data-f="up" ${r.usesPisah?'disabled':''}></td>
       <td><input type="number" step="0.05" value="${r.upmk}" data-idx="${idx}" data-f="upmk" ${r.usesPisah?'disabled':''}></td>
       <td style="text-align:center;"><input type="checkbox" data-idx="${idx}" data-f="usesPisah" ${r.usesPisah?'checked':''}></td>
+      <td>
+        <select data-idx="${idx}" data-f="pisahSource" ${r.usesPisah?'':'disabled'}>
+          <option value="umum" ${r.pisahSource!=='mendesak'?'selected':''}>Umum</option>
+          <option value="mendesak" ${r.pisahSource==='mendesak'?'selected':''}>Mendesak</option>
+        </select>
+      </td>
       <td><button class="rm" data-idx="${idx}">✕</button></td>
     `;
     tbody.appendChild(tr);
@@ -564,6 +582,13 @@ function renderReasonsAdmin(){
       renderReasonsAdmin(); scheduleSave(); rebuildPHKReasonDropdown();
     });
   });
+  tbody.querySelectorAll('select').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const idx=+sel.dataset.idx;
+      state.reasonsPHK[idx].pisahSource = sel.value;
+      scheduleSave(); rebuildPHKReasonDropdown();
+    });
+  });
   tbody.querySelectorAll('.rm').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       state.reasonsPHK.splice(+btn.dataset.idx,1);
@@ -572,7 +597,7 @@ function renderReasonsAdmin(){
   });
 }
 document.getElementById('addReasonRow').addEventListener('click', ()=>{
-  state.reasonsPHK.push({label:'Alasan baru', up:1, upmk:1, usesPisah:false});
+  state.reasonsPHK.push({label:'Alasan baru', up:1, upmk:1, usesPisah:false, pisahSource:'umum'});
   renderReasonsAdmin(); scheduleSave(); rebuildPHKReasonDropdown();
 });
 
@@ -583,18 +608,18 @@ function rebuildPHKReasonDropdown(){
   state.reasonsPHK.forEach((r, idx)=>{
     const opt = document.createElement('option');
     opt.value = idx;
-    opt.textContent = r.label + (r.usesPisah ? ' (Uang Pisah)' : ` (${r.up}x UP / ${r.upmk}x UPMK)`);
+    opt.textContent = r.label + (r.usesPisah ? ` (Uang Pisah - ${r.pisahSource==='mendesak'?'Mendesak':'Umum'})` : ` (${r.up}x UP / ${r.upmk}x UPMK)`);
     sel.appendChild(opt);
   });
   if(prevVal && +prevVal < state.reasonsPHK.length) sel.value = prevVal;
   computePHK();
 }
 
-// ---------------- ADMIN: PISAH TABLE (shared) ----------------
-function renderPisahAdmin(){
-  const tbody = document.getElementById('pisahRowsAdmin');
+// ---------------- ADMIN: PISAH TABLES (umum & mendesak) ----------------
+function renderPisahTable(stateKey, tbodyId){
+  const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = '';
-  state.pisahRows.forEach((row, idx)=>{
+  state[stateKey].forEach((row, idx)=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><input type="number" value="${row.from}" data-idx="${idx}" data-f="from"></td>
@@ -605,20 +630,28 @@ function renderPisahAdmin(){
   });
   tbody.querySelectorAll('input').forEach(inp=>{
     inp.addEventListener('input', ()=>{
-      state.pisahRows[+inp.dataset.idx][inp.dataset.f] = parseFloat(inp.value)||0;
+      state[stateKey][+inp.dataset.idx][inp.dataset.f] = parseFloat(inp.value)||0;
       scheduleSave(); computePHK(); computeResign();
     });
   });
   tbody.querySelectorAll('.rm').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      state.pisahRows.splice(+btn.dataset.idx,1);
-      renderPisahAdmin(); scheduleSave(); computePHK(); computeResign();
+      state[stateKey].splice(+btn.dataset.idx,1);
+      renderPisahTable(stateKey, tbodyId); scheduleSave(); computePHK(); computeResign();
     });
   });
 }
+function renderPisahAdmin(){
+  renderPisahTable('pisahRows', 'pisahRowsAdmin');
+  renderPisahTable('pisahRowsMendesak', 'pisahRowsMendesakAdmin');
+}
 document.getElementById('addPisahRowAdmin').addEventListener('click', ()=>{
   state.pisahRows.push({from:0,to:0,months:0});
-  renderPisahAdmin(); scheduleSave();
+  renderPisahTable('pisahRows','pisahRowsAdmin'); scheduleSave();
+});
+document.getElementById('addPisahRowMendesakAdmin').addEventListener('click', ()=>{
+  state.pisahRowsMendesak.push({from:0,to:0,months:0});
+  renderPisahTable('pisahRowsMendesak','pisahRowsMendesakAdmin'); scheduleSave();
 });
 
 // ---------------- ADMIN: CHECKLIST EDITOR (generic) ----------------
@@ -727,7 +760,7 @@ function computePHK(){
   const r = state.reasonsPHK[reasonIdx] || state.reasonsPHK[0];
   if(!r) return;
   document.getElementById('phk_reasonNote').innerHTML = r.usesPisah
-    ? '<b>Alasan ini tidak mendapat Pesangon/Penghargaan menurut UU</b> — kompensasi mengikuti Uang Pisah sesuai Peraturan Perusahaan.'
+    ? `<b>Alasan ini tidak mendapat Pesangon/Penghargaan menurut UU</b> — kompensasi mengikuti Uang Pisah${r.pisahSource==='mendesak' ? ' (tabel khusus pelanggaran mendesak)' : ' (tabel umum)'} sesuai Peraturan Perusahaan.`
     : `<b>Faktor pengali:</b> ${r.up}× ketentuan Uang Pesangon, ${r.upmk}× ketentuan Uang Penghargaan.`;
   document.getElementById('phk_pisahSection').style.display = r.usesPisah ? '' : 'none';
   document.getElementById('phk_rowUP').style.display = r.usesPisah ? 'none' : '';
@@ -736,7 +769,8 @@ function computePHK(){
 
   let upNominal=0, upmkNominal=0, pisahNominal=0, upTier=0, upmkTier=0, pisahMonths=0;
   if(r.usesPisah){
-    pisahMonths = getPisahMonths(months/12);
+    const pisahTable = r.pisahSource === 'mendesak' ? state.pisahRowsMendesak : state.pisahRows;
+    pisahMonths = getPisahMonths(months/12, pisahTable);
     pisahNominal = pisahMonths * upah;
     document.getElementById('phk_subPisah').textContent = `${pisahMonths} bulan upah × ${fmtRupiah(upah)}`;
     document.getElementById('phk_valPisah').textContent = fmtRupiah(pisahNominal);
@@ -1154,8 +1188,13 @@ document.getElementById('downloadAllPdfBtn').addEventListener('click', async ()=
 (async function init(){
   const saved = await loadState();
   if(saved){
-    if(saved.reasonsPHK) state.reasonsPHK = saved.reasonsPHK;
+    if(saved.reasonsPHK) state.reasonsPHK = saved.reasonsPHK.map(r=>{
+      if(r.pisahSource) return r;
+      const isMendesak = r.usesPisah && /mendesak|kesalahan berat/i.test(r.label||'');
+      return { ...r, pisahSource: isMendesak ? 'mendesak' : 'umum' };
+    });
     if(saved.pisahRows) state.pisahRows = saved.pisahRows;
+    if(saved.pisahRowsMendesak) state.pisahRowsMendesak = saved.pisahRowsMendesak;
     if(saved.checklistPHK) state.checklistPHK = saved.checklistPHK;
     if(saved.checklistResign) state.checklistResign = saved.checklistResign;
     if(saved.phkClState) state.phkClState = saved.phkClState;
