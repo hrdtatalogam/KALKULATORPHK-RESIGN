@@ -1,9 +1,0 @@
-{
-  "name": "kalkulator-phk-resign",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Kalkulator PHK & Resign dengan riwayat tersimpan di Netlify Blobs",
-  "dependencies": {
-    "@netlify/blobs": "^8.1.0"
-  }
-}
