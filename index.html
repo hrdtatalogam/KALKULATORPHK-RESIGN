@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator PHK & Resign</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%231E2A47' stroke='%23C89B3C' stroke-width='3'/%3E%3Ctext x='32' y='40' font-family='Georgia,serif' font-weight='700' font-size='22' fill='%23E8D5A8' text-anchor='middle'%3ERE%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1D29; --navy:#1E2A47; --slate:#3D5A80; --gold:#C89B3C; --gold-soft:#E8D5A8;
+    --bg:#F3F5F8; --paper:#FFFFFF; --line:#DDE2EA; --muted:#6B7280; --good:#4C7A5D; --good-bg:#E7F0EA; --bad:#B0483F; --bad-bg:#F6E7E5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden;}
+  h1,h2,h3{font-family:'Fraunces',serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .app{max-width:880px;margin:0 auto;padding:20px 14px 90px;}
+  img,svg,table,input,select,textarea,.card,.doc{max-width:100%;}
+
+  .masthead{margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+  .logo-badge{width:52px;height:52px;border-radius:50%;background:var(--navy);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .logo-badge span{font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:var(--gold-soft);letter-spacing:.01em;}
+  .masthead-text{min-width:0;}
+  .eyebrow{font-family:'IBM Plex Mono';font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);margin:0 0 6px;}
+  .masthead h1{font-size:24px;font-weight:600;margin:0 0 4px;color:var(--navy);}
+  .masthead p{margin:0;color:var(--muted);font-size:13px;line-height:1.6;}
+
+  .maintabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;}
+  .maintabs button{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;}
+  .maintabs button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px;width:100%;}
+  .card h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 14px;font-weight:700;}
+
+  .frow2{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;}
+  @media (max-width:540px){.frow2{grid-template-columns:1fr;}}
+  .fgroup{margin-bottom:11px;min-width:0;}
+  .fgroup label{font-size:10.5px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:4px;}
+  .fgroup input, .fgroup select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-family:'Plus Jakarta Sans';font-size:13px;background:#fff;min-width:0;}
+  .fgroup.checkbox-row{display:flex;align-items:center;gap:8px;}
+  .fgroup.checkbox-row input{width:auto;}
+  .fgroup.checkbox-row label{margin:0;text-transform:none;font-size:13px;font-weight:600;color:var(--ink);}
+  .section-label{font-size:11.5px;font-weight:800;color:var(--navy);margin:14px 0 8px;padding-top:12px;border-top:1px solid var(--line);}
+  .section-label:first-child{margin-top:0;padding-top:0;border-top:none;}
+  .masa-kerja-display{font-size:12px;color:var(--slate);font-weight:600;margin-top:-4px;margin-bottom:12px;}
+
+  .callout{background:#EFEAE0;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:11px 13px;font-size:12px;line-height:1.6;margin-top:6px;}
+
+  .edit-table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed;}
+  .edit-table th{text-align:left;font-size:10px;text-transform:uppercase;color:var(--muted);padding:5px 4px;border-bottom:1px solid var(--line);}
+  .edit-table td{padding:4px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .edit-table input{width:100%;padding:6px 7px;border:1px solid var(--line);border-radius:6px;font-size:12px;}
+  .edit-table input[type=checkbox]{width:auto;}
+  .add-row-btn{margin-top:8px;font-size:12.5px;font-weight:700;color:var(--slate);background:none;border:1px dashed var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;}
+  .rm{background:none;border:none;color:var(--bad);cursor:pointer;font-weight:700;font-size:13px;}
+  .riwayat-table th, .riwayat-table td{font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;color:var(--ink);}
+  .riwayat-table th{font-family:'Plus Jakarta Sans',sans-serif;}
+
+  .result-group{margin-bottom:14px;}
+  .result-group-title{font-size:12.5px;font-weight:800;color:var(--navy);margin-bottom:6px;}
+  .result-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .result-row .sub{display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px;}
+  .result-row .val{font-family:'IBM Plex Mono';font-weight:600;white-space:nowrap;}
+  .result-row.total{border-top:2px solid var(--navy);border-bottom:none;padding-top:12px;margin-top:4px;}
+  .result-row.total .val{font-size:18px;color:var(--navy);font-family:'Fraunces';}
+  .result-row.total .lbl{font-weight:800;font-size:14px;color:var(--navy);}
+
+  .cl-stage{margin-bottom:14px;}
+  .cl-stage-title{font-weight:700;font-size:12.5px;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .cl-stage-title .n{font-family:'IBM Plex Mono';font-size:10.5px;background:var(--navy);color:var(--gold-soft);padding:2px 8px;border-radius:6px;}
+  .cl-item{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);align-items:flex-start;flex-wrap:wrap;}
+  .cl-item .box{width:18px;height:18px;border:1.5px solid #999;border-radius:4px;flex-shrink:0;margin-top:1px;cursor:pointer;}
+  .cl-item.done .box{background:var(--good);border-color:var(--good);}
+  .cl-item.done .txt{color:var(--muted);text-decoration:line-through;}
+  .cl-item .txt{font-size:13px;flex:1;min-width:120px;}
+  .cl-item .due-input{border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:11.5px;font-family:'Plus Jakarta Sans';width:100%;max-width:180px;flex-shrink:0;box-sizing:border-box;}
+  @media (max-width:480px){
+    .cl-item{flex-direction:column;align-items:stretch;}
+    .cl-item .box{margin-bottom:2px;}
+    .cl-item .due-input{max-width:100%;margin-top:2px;margin-left:26px;width:calc(100% - 26px);}
+  }
+
+  .btn{border:none;border-radius:10px;padding:12px 20px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:'Plus Jakarta Sans';}
+  .btn-gold{background:var(--gold);color:#1A1D29;}
+  .btn-gold:hover{background:#B68A2E;}
+  .actions{display:flex;justify-content:center;margin-top:6px;}
+
+  .subtab{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .subtab button{border:1px solid var(--line);background:var(--paper);border-radius:20px;padding:7px 13px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;}
+  .subtab button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+  .p-title{font-family:'Fraunces';font-size:18px;text-align:center;margin:0 0 2px;color:#1E2A47;}
+  .p-sub{text-align:center;font-size:11px;color:#6B7280;margin:0 0 16px;font-family:'IBM Plex Mono';}
+  table.p-meta{width:100%;margin-bottom:14px;}
+  table.p-meta td{padding:2px 4px;font-size:12.5px;}
+  table.p-meta td.k{width:32%;color:#555;}
+  table.p-comp{width:100%;border-collapse:collapse;margin-bottom:14px;}
+  table.p-comp th{text-align:left;font-size:10.5px;text-transform:uppercase;color:#6B7280;padding:7px;border-bottom:2px solid #1E2A47;}
+  table.p-comp td{padding:8px 7px;font-size:12.5px;border-bottom:1px solid #eee;}
+  table.p-comp td.num{text-align:right;font-family:'IBM Plex Mono';}
+  tr.p-subtotal td{font-weight:700;border-top:1px solid #ccc;}
+  tr.p-total td{font-weight:800;font-size:14px;border-top:2px solid #1E2A47;border-bottom:none;padding-top:10px;}
+  .p-cl-item{display:flex;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid #f2f2f2;}
+  .p-cl-box{width:11px;height:11px;border:1px solid #999;flex-shrink:0;margin-top:2px;}
+  .p-cl-box.done{background:#4C7A5D;border-color:#4C7A5D;}
+  .p-disclaimer{font-size:10.5px;color:#6B7280;line-height:1.6;margin-top:16px;border-top:1px solid #eee;padding-top:10px;}
+  h4.p-h4{font-size:13px;color:#1E2A47;margin:16px 0 8px;}
+
+  .p-page-break{page-break-before:always;}
+  .p-cl-cover{display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid #1E2A47;padding-bottom:8px;margin-bottom:10px;}
+  .p-cl-cover .name{font-family:'Fraunces',serif;font-size:16px;color:#1E2A47;font-weight:600;}
+  .p-cl-cover .meta{font-size:10.5px;color:#6B7280;font-family:'IBM Plex Mono',monospace;text-align:right;}
+  .p-cl-summary{font-size:10.5px;color:#6B7280;margin-bottom:10px;}
+  .p-cl-summary b{color:#1E2A47;font-family:'IBM Plex Mono',monospace;}
+  table.p-cl-table{width:100%;border-collapse:collapse;margin-bottom:14px;border:1px solid #cfd4dc;}
+  table.p-cl-table thead th{background:#1E2A47;color:#E8D5A8;font-size:9px;text-transform:uppercase;letter-spacing:.03em;padding:5px 6px;text-align:left;border:1px solid #1E2A47;}
+  table.p-cl-table td{padding:4px 6px;font-size:10.5px;border:1px solid #e6e8ec;vertical-align:top;color:#1A1D29;line-height:1.35;}
+  table.p-cl-table tr{page-break-inside:avoid;}
+  table.p-cl-table tr.p-cl-stage-row td{background:#EEF1F5;font-weight:700;color:#1E2A47;font-size:10px;padding:5px 6px;border-top:1.5px solid #1E2A47;}
+  table.p-cl-table td.p-cl-no{width:20px;text-align:center;color:#9096a0;font-family:'IBM Plex Mono',monospace;font-size:9px;}
+  table.p-cl-table td.p-cl-status{width:34px;text-align:center;font-weight:700;color:#4C7A5D;font-size:10.5px;}
+  table.p-cl-table td.p-cl-note{width:22%;color:#8B8F97;font-style:italic;font-size:9.5px;}
+
+  #printDoc{display:none;}
+  @media print{
+    @page{ size: A4; margin: 12mm; }
+    .app{ display:none !important; }
+    #printDoc{display:block !important;position:static;width:auto;padding:0;margin:0;font-size:12px;line-height:1.5;color:#1A1D29;}
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <div class="masthead">
+    <div class="logo-badge"><span>RE</span></div>
+    <div class="masthead-text">
+      <p class="eyebrow">HR Compensation Toolkit</p>
+      <h1>Kalkulator PHK &amp; Resign</h1>
+      <p>Satu tool untuk dua alur: Pemutusan Hubungan Kerja dan Pengunduran Diri. Semua aturan (faktor pengali, tabel uang pisah, checklist) bisa kamu custom sendiri di Panel Admin.</p>
+    </div>
+  </div>
+
+  <div class="maintabs">
+    <button class="main-tab active" data-tab="phk">PHK</button>
+    <button class="main-tab" data-tab="resign">Resign</button>
+    <button class="main-tab" data-tab="riwayat">📜 Riwayat</button>
+    <button class="main-tab" data-tab="admin">⚙ Panel Admin</button>
+  </div>
+
+  <!-- ================= PHK TAB ================= -->
+  <div id="tab-phk">
+    <div class="card">
+      <h2>Data Karyawan</h2>
+      <div class="frow2">
+        <div class="fgroup"><label>Nama</label><input type="text" id="phk_nama" placeholder="Nama karyawan"></div>
+        <div class="fgroup"><label>NIK Karyawan</label><input type="text" id="phk_nik" placeholder="NIK"></div>
+      </div>
+      <div class="frow2">
+        <div class="fgroup"><label>Jabatan</label><input type="text" id="phk_jabatan" placeholder="Jabatan"></div>
+        <div class="fgroup"><label>Perusahaan</label><input type="text" id="phk_perusahaan" placeholder="Nama perusahaan"></div>
+      </div>
+      <div class="frow2">
+        <div class="fgroup"><label>Tanggal Mulai Kerja</label><input type="date" id="phk_mulai"></div>
+        <div class="fgroup"><label>Tanggal PHK</label><input type="date" id="phk_tgl"></div>
+      </div>
+      <div class="masa-kerja-display" id="phk_masaKerjaDisplay">Masa kerja: -</div>
+
+      <div class="section-label">Alasan &amp; Kompensasi</div>
+      <div class="fgroup"><label>Alasan PHK</label><select id="phk_alasan"></select></div>
+      <div class="callout" id="phk_reasonNote"></div>
+
+      <div id="phk_pisahSection" style="display:none;">
+        <div class="section-label">Uang Pisah dipakai untuk alasan ini</div>
+        <p style="font-size:12px;color:var(--muted);margin:-4px 0 4px;">Nominalnya mengikuti Tabel Uang Pisah di Panel Admin.</p>
+      </div>
+
+      <div class="section-label">Upah &amp; Pajak</div>
+      <div class="frow2">
+        <div class="fgroup"><label>Upah (Gaji Pokok + Tunjangan Tetap)</label><input type="number" id="phk_upah" placeholder="8000000"></div>
+        <div class="fgroup"><label>Status NPWP</label><select id="phk_npwp"><option value="ada">Memiliki NPWP</option><option value="tidak">Tidak Memiliki NPWP</option></select></div>
+      </div>
+
+      <div class="section-label">Uang Penggantian Hak (UPH)</div>
+      <div class="frow2">
+        <div class="fgroup"><label>Sisa Cuti Belum Diambil (hari)</label><input type="number" id="phk_cuti" placeholder="6"></div>
+        <div class="fgroup"><label>Komponen Lain UPH (Rp)</label><input type="number" id="phk_uphLain" placeholder="0"></div>
+      </div>
+      <div class="fgroup checkbox-row"><input type="checkbox" id="phk_biayaPulangAktif"><label for="phk_biayaPulangAktif">Sertakan biaya pulang ke tempat asal diterima kerja</label></div>
+      <div class="fgroup checkbox-row"><input type="checkbox" id="phk_perumahanAktif" checked><label for="phk_perumahanAktif">Sertakan penggantian perumahan &amp; pengobatan (15%)</label></div>
+      <div class="fgroup" id="phk_biayaPulangWrap" style="display:none;"><label>Nominal Biaya Pulang (Rp)</label><input type="number" id="phk_biayaPulang" placeholder="1500000"></div>
+    </div>
+
+    <div class="card">
+      <h2>Hasil Perhitungan</h2>
+      <div class="result-group">
+        <div class="result-group-title">Uang Pesangon &amp; Penghargaan</div>
+        <div class="result-row" id="phk_rowUP"><div><span class="lbl">Uang Pesangon</span><span class="sub" id="phk_subUP"></span></div><div class="val" id="phk_valUP">Rp 0</div></div>
+        <div class="result-row" id="phk_rowUPMK"><div><span class="lbl">Uang Penghargaan Masa Kerja</span><span class="sub" id="phk_subUPMK"></span></div><div class="val" id="phk_valUPMK">Rp 0</div></div>
+        <div class="result-row" id="phk_rowPisah" style="display:none;"><div><span class="lbl">Uang Pisah</span><span class="sub" id="phk_subPisah"></span></div><div class="val" id="phk_valPisah">Rp 0</div></div>
+        <div class="result-row total" style="border-top:1px solid var(--line);padding-top:8px;">
+          <div class="lbl" style="font-size:13px;">Total Pesangon &amp; Penghargaan</div>
+          <div class="val" style="font-size:15px;" id="phk_valSubtotalPesangon">Rp 0</div>
+        </div>
+      </div>
+      <div class="result-group">
+        <div class="result-group-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Uang Penggantian Hak</span>
+          <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--muted);text-transform:none;cursor:pointer;">
+            <input type="checkbox" id="phk_uphAktif" checked style="width:auto;"> Sertakan UPH
+          </label>
+        </div>
+        <div id="phk_uphRowsWrap">
+          <div class="result-row"><div><span class="lbl">Cuti belum diambil</span><span class="sub" id="phk_subCuti"></span></div><div class="val" id="phk_valCuti">Rp 0</div></div>
+          <div class="result-row" id="phk_rowBiayaPulang" style="display:none;"><div><span class="lbl">Biaya pulang</span></div><div class="val" id="phk_valBiayaPulang">Rp 0</div></div>
+          <div class="result-row" id="phk_rowPerumahan"><div><span class="lbl">Perumahan &amp; pengobatan (15%)</span><span class="sub" id="phk_subPerumahan"></span></div><div class="val" id="phk_valPerumahan">Rp 0</div></div>
+          <div class="result-row"><div><span class="lbl">Lain-lain</span></div><div class="val" id="phk_valLain">Rp 0</div></div>
+        </div>
+        <div class="result-row total"><div class="lbl">Subtotal UPH</div><div class="val" id="phk_valUPHTotal">Rp 0</div></div>
+      </div>
+      <div class="result-group">
+        <div class="result-group-title">Pajak (PPh 21 Final)</div>
+        <div class="result-row"><div><span class="lbl">Total Kompensasi Bruto</span></div><div class="val" id="phk_valBruto">Rp 0</div></div>
+        <div class="result-row"><div><span class="lbl">Dipotong PPh 21 Final</span><span class="sub" id="phk_subPajak"></span></div><div class="val" id="phk_valPajak">– Rp 0</div></div>
+      </div>
+      <div class="result-row total"><div class="lbl">Total Diterima (Netto)</div><div class="val" id="phk_valTotalNetto">Rp 0</div></div>
+      <div class="callout">Estimasi otomatis — tetap verifikasi ke Legal/HC Manager/Payroll sebelum jadi dasar pembayaran resmi.</div>
+    </div>
+
+    <div class="card">
+      <h2>Checklist Proses PHK — <span id="phk_checklistNameLabel">Karyawan</span></h2>
+      <div id="phk_checklistBody"></div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--line);"><h2 style="margin:0;">Preview Hasil Export PDF</h2></div>
+      <div id="phk_pdfPreview" style="background:#fff;padding:26px 22px;max-height:560px;overflow-y:auto;font-size:12.5px;line-height:1.6;color:#1A1D29;"></div>
+    </div>
+    <div class="actions"><button class="btn btn-gold" id="phk_exportBtn">Export ke PDF</button></div>
+  </div>
+
+  <!-- ================= RESIGN TAB ================= -->
+  <div id="tab-resign" style="display:none;">
+    <div class="card">
+      <h2>Data Karyawan</h2>
+      <div class="frow2">
+        <div class="fgroup"><label>Nama</label><input type="text" id="rs_nama" placeholder="Nama karyawan"></div>
+        <div class="fgroup"><label>NIK Karyawan</label><input type="text" id="rs_nik" placeholder="NIK"></div>
+      </div>
+      <div class="frow2">
+        <div class="fgroup"><label>Jabatan</label><input type="text" id="rs_jabatan" placeholder="Jabatan"></div>
+        <div class="fgroup"><label>Perusahaan</label><input type="text" id="rs_perusahaan" placeholder="Nama perusahaan"></div>
+      </div>
+      <div class="frow2">
+        <div class="fgroup"><label>Tanggal Mulai Kerja</label><input type="date" id="rs_mulai"></div>
+        <div class="fgroup"><label>Tanggal Efektif Resign</label><input type="date" id="rs_tgl"></div>
+      </div>
+      <div class="masa-kerja-display" id="rs_masaKerjaDisplay">Masa kerja: -</div>
+
+      <div class="section-label">Upah &amp; Pajak</div>
+      <div class="frow2">
+        <div class="fgroup"><label>Upah (Gaji Pokok + Tunjangan Tetap)</label><input type="number" id="rs_upah" placeholder="8000000"></div>
+        <div class="fgroup"><label>Status NPWP</label><select id="rs_npwp"><option value="ada">Memiliki NPWP</option><option value="tidak">Tidak Memiliki NPWP</option></select></div>
+      </div>
+
+      <div class="section-label">Uang Pisah</div>
+      <div class="fgroup checkbox-row"><input type="checkbox" id="rs_pisahAktif" checked><label for="rs_pisahAktif">Karyawan berhak Uang Pisah (sesuai Peraturan Perusahaan)</label></div>
+      <p style="font-size:12px;color:var(--muted);margin:0;">Nominalnya mengikuti Tabel Uang Pisah yang sama dengan tab PHK — bisa diatur di Panel Admin.</p>
+
+      <div class="section-label">Uang Penggantian Hak (UPH)</div>
+      <div class="frow2">
+        <div class="fgroup"><label>Sisa Cuti Belum Diambil (hari)</label><input type="number" id="rs_cuti" placeholder="6"></div>
+        <div class="fgroup"><label>Komponen Lain UPH (Rp)</label><input type="number" id="rs_uphLain" placeholder="0"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Hasil Perhitungan</h2>
+      <div class="result-group">
+        <div class="result-row" id="rs_rowPisah"><div><span class="lbl">Uang Pisah</span><span class="sub" id="rs_subPisah"></span></div><div class="val" id="rs_valPisah">Rp 0</div></div>
+      </div>
+      <div class="result-group">
+        <div class="result-group-title">Uang Penggantian Hak</div>
+        <div class="result-row"><div><span class="lbl">Cuti belum diambil</span><span class="sub" id="rs_subCuti"></span></div><div class="val" id="rs_valCuti">Rp 0</div></div>
+        <div class="result-row"><div><span class="lbl">Lain-lain</span></div><div class="val" id="rs_valLain">Rp 0</div></div>
+        <div class="result-row total"><div class="lbl">Subtotal UPH</div><div class="val" id="rs_valUPHTotal">Rp 0</div></div>
+      </div>
+      <div class="result-group">
+        <div class="result-group-title">Pajak (PPh 21 Final)</div>
+        <div class="result-row"><div><span class="lbl">Total Kompensasi Bruto</span></div><div class="val" id="rs_valBruto">Rp 0</div></div>
+        <div class="result-row"><div><span class="lbl">Dipotong PPh 21 Final</span><span class="sub" id="rs_subPajak"></span></div><div class="val" id="rs_valPajak">– Rp 0</div></div>
+      </div>
+      <div class="result-row total"><div class="lbl">Total Diterima (Netto)</div><div class="val" id="rs_valTotalNetto">Rp 0</div></div>
+      <div class="callout">Estimasi otomatis — tetap verifikasi ke Legal/HC Manager/Payroll sebelum jadi dasar pembayaran resmi.</div>
+    </div>
+
+    <div class="card">
+      <h2>Checklist Proses Resign — <span id="rs_checklistNameLabel">Karyawan</span></h2>
+      <div id="rs_checklistBody"></div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--line);"><h2 style="margin:0;">Preview Hasil Export PDF</h2></div>
+      <div id="rs_pdfPreview" style="background:#fff;padding:26px 22px;max-height:560px;overflow-y:auto;font-size:12.5px;line-height:1.6;color:#1A1D29;"></div>
+    </div>
+    <div class="actions"><button class="btn btn-gold" id="rs_exportBtn">Export ke PDF</button></div>
+  </div>
+
+  <!-- ================= RIWAYAT TAB ================= -->
+  <div id="tab-riwayat" style="display:none;">
+    <div class="card">
+      <h2>Riwayat Perhitungan</h2>
+      <p style="font-size:12.5px;color:var(--muted);margin:-8px 0 12px;">Setiap kali kamu klik "Export ke PDF" di tab PHK/Resign, datanya otomatis tersimpan di server (Netlify Blobs) — bisa diakses siapapun di tim yang membuka link ini, dari device manapun.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+        <button class="add-row-btn" id="downloadCsvBtn">⬇ Download Semua (CSV)</button>
+        <button class="add-row-btn" id="downloadAllPdfBtn">⬇ Download Semua (PDF ZIP)</button>
+        <button class="add-row-btn" id="refreshHistoryBtn">↻ Refresh</button>
+        <button class="add-row-btn" id="clearHistoryBtn" style="color:var(--bad);">🗑 Hapus Semua Riwayat</button>
+      </div>
+      <div id="riwayatList"></div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN TAB ================= -->
+  <div id="tab-admin" style="display:none;">
+    <div class="subtab">
+      <button class="admin-sub active" data-s="reasons">Alasan PHK &amp; Faktor</button>
+      <button class="admin-sub" data-s="pisah">Tabel Uang Pisah</button>
+      <button class="admin-sub" data-s="cl-phk">Checklist PHK</button>
+      <button class="admin-sub" data-s="cl-resign">Checklist Resign</button>
+    </div>
+
+    <div id="admin-reasons" class="card">
+      <h2>Alasan PHK &amp; Faktor Pengali</h2>
+      <p style="font-size:12px;color:var(--muted);margin:-6px 0 6px;">Kalau ada update aturan ketenagakerjaan atau alasan PHK baru, edit/tambah baris di sini. Centang "Pakai Uang Pisah" untuk alasan yang tidak dapat Pesangon/Penghargaan menurut UU (misal kesalahan berat) — lalu pilih tabel Uang Pisah mana yang dipakai.</p>
+      <table class="edit-table">
+        <thead><tr><th style="width:30%;">Label Alasan</th><th>UP (×)</th><th>UPMK (×)</th><th>Pakai Uang Pisah</th><th style="width:16%;">Sumber Uang Pisah</th><th></th></tr></thead>
+        <tbody id="reasonsRows"></tbody>
+      </table>
+      <button class="add-row-btn" id="addReasonRow">+ Tambah alasan</button>
+    </div>
+
+    <div id="admin-pisah" class="card" style="display:none;">
+      <h2>Tabel Uang Pisah — Umum</h2>
+      <p style="font-size:12px;color:var(--muted);margin:-6px 0 6px;">Dipakai oleh tab Resign, dan alasan PHK mana pun yang di atas diset sumbernya ke "Umum". Nominal ini kebijakan Peraturan Perusahaan kamu, bukan ketentuan pemerintah.</p>
+      <table class="edit-table">
+        <thead><tr><th>Dari (th)</th><th>Sampai (th)</th><th>Bulan Upah</th><th></th></tr></thead>
+        <tbody id="pisahRowsAdmin"></tbody>
+      </table>
+      <button class="add-row-btn" id="addPisahRowAdmin">+ Tambah baris</button>
+
+      <h2 style="margin-top:26px;">Tabel Uang Pisah — Pelanggaran Mendesak</h2>
+      <p style="font-size:12px;color:var(--muted);margin:-6px 0 6px;">Tabel terpisah, khusus dipakai untuk alasan PHK yang sumbernya diset ke "Mendesak" (biasanya kesalahan berat/pelanggaran mendesak) — sesuai PP perusahaan kamu, bisa beda nominal dari tabel umum di atas.</p>
+      <table class="edit-table">
+        <thead><tr><th>Dari (th)</th><th>Sampai (th)</th><th>Bulan Upah</th><th></th></tr></thead>
+        <tbody id="pisahRowsMendesakAdmin"></tbody>
+      </table>
+      <button class="add-row-btn" id="addPisahRowMendesakAdmin">+ Tambah baris</button>
+    </div>
+
+    <div id="admin-cl-phk" class="card" style="display:none;">
+      <h2>Custom Checklist — PHK</h2>
+      <div id="clEditor-phk"></div>
+      <button class="add-row-btn" id="addStagePHK">+ Tambah tahap</button>
+    </div>
+
+    <div id="admin-cl-resign" class="card" style="display:none;">
+      <h2>Custom Checklist — Resign</h2>
+      <div id="clEditor-resign"></div>
+      <button class="add-row-btn" id="addStageResign">+ Tambah tahap</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="printDoc"></div>
+
+<script>
+function fmtRupiah(n){ n = Math.round(parseFloat(n)||0); return 'Rp ' + n.toLocaleString('id-ID'); }
+function val(id){ const el=document.getElementById(id); return el ? (el.value || '') : ''; }
+function num(id){ return parseFloat(val(id)) || 0; }
+function esc(s){ return (s||'').replace(/"/g,'&quot;'); }
+
+// ---------------- MAIN TAB SWITCHING ----------------
+document.querySelectorAll('.main-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.main-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-phk').style.display = btn.dataset.tab==='phk' ? '' : 'none';
+    document.getElementById('tab-resign').style.display = btn.dataset.tab==='resign' ? '' : 'none';
+    document.getElementById('tab-riwayat').style.display = btn.dataset.tab==='riwayat' ? '' : 'none';
+    document.getElementById('tab-admin').style.display = btn.dataset.tab==='admin' ? '' : 'none';
+    if(btn.dataset.tab === 'riwayat'){
+      renderRiwayat();
+      loadHistoryFromServer().then(renderRiwayat);
+    }
+  });
+});
+document.querySelectorAll('.admin-sub').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.admin-sub').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    ['reasons','pisah','cl-phk','cl-resign'].forEach(s=>{
+      document.getElementById('admin-'+s).style.display = (s===btn.dataset.s) ? '' : 'none';
+    });
+  });
+});
+
+// ---------------- SHARED HELPERS ----------------
+function calcMasaKerjaBulan(mulai, phk){
+  if(!mulai || !phk) return 0;
+  const d1 = new Date(mulai), d2 = new Date(phk);
+  if(d2 <= d1) return 0;
+  let months = (d2.getFullYear()-d1.getFullYear())*12 + (d2.getMonth()-d1.getMonth());
+  if(d2.getDate() < d1.getDate()) months -= 1;
+  return Math.max(months,0);
+}
+function upTierBulan(months){
+  if(months < 12) return 1; if(months < 24) return 2; if(months < 36) return 3;
+  if(months < 48) return 4; if(months < 60) return 5; if(months < 72) return 6;
+  if(months < 84) return 7; if(months < 96) return 8; return 9;
+}
+function upmkTierBulan(months){
+  if(months < 36) return 0; if(months < 72) return 2; if(months < 108) return 3;
+  if(months < 144) return 4; if(months < 180) return 5; if(months < 216) return 6;
+  if(months < 252) return 7; if(months < 288) return 8; return 10;
+}
+function computePPhFinal(bruto, npwpStatus){
+  const tiersDef = [
+    {min:0, max:50000000, rate:0}, {min:50000000, max:100000000, rate:0.05},
+    {min:100000000, max:500000000, rate:0.15}, {min:500000000, max:Infinity, rate:0.25}
+  ];
+  const mult = npwpStatus === 'tidak' ? 1.2 : 1;
+  let tax = 0;
+  tiersDef.forEach(t=>{ if(bruto > t.min){ tax += (Math.min(bruto,t.max)-t.min) * t.rate * mult; } });
+  return tax;
+}
+function getPisahMonths(years, rows){
+  const table = rows || state.pisahRows;
+  for(const row of table){ if(years >= row.from && years < row.to) return row.months; }
+  return 0;
+}
+
+// ---------------- STATE ----------------
+let state = {
+  reasonsPHK: [
+    {label:'Efisiensi karena perusahaan rugi', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Perusahaan tutup karena rugi terus-menerus', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Perusahaan pailit', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Force majeure yang menyebabkan tutup', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Pengambilalihan, karyawan tidak bersedia lanjut', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Pelanggaran PK/PP/PKB (sudah SP1, SP2, SP3)', up:0.5, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Force majeure yang tidak menyebabkan tutup', up:0.75, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Efisiensi untuk mencegah kerugian', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Perusahaan tutup bukan karena rugi', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Penggabungan/peleburan, tidak bersedia lanjut', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Pengambilalihan perusahaan', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Mengundurkan diri krn pelanggaran pengusaha (Psl 36 huruf g)', up:1, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Karyawan memasuki usia pensiun', up:1.75, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Sakit berkepanjangan/cacat akibat kecelakaan kerja >12 bulan', up:2, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Karyawan meninggal dunia', up:2, upmk:1, usesPisah:false, pisahSource:'umum'},
+    {label:'Pelanggaran mendesak / kesalahan berat', up:0, upmk:0, usesPisah:true, pisahSource:'mendesak'}
+  ],
+  pisahRows: [
+    {from:1, to:3, months:1}, {from:3, to:6, months:2}, {from:6, to:9, months:3}, {from:9, to:99, months:4}
+  ],
+  pisahRowsMendesak: [
+    {from:1, to:3, months:1}, {from:3, to:6, months:2}, {from:6, to:9, months:3}, {from:9, to:99, months:4}
+  ],
+  checklistPHK: [
+    { title:'Tahap Persiapan', items:[
+      'Dokumentasi pelanggaran/alasan PHK lengkap (SP1-3 atau bukti pendukung lain)',
+      'Konsultasi dengan legal/HC Manager mengenai dasar hukum PHK',
+      'Hitung estimasi kompensasi (sudah otomatis di atas)'
+    ]},
+    { title:'Perundingan Bipartit', items:[
+      'Sampaikan pemberitahuan PHK tertulis ke karyawan (min. 14 hari sebelum PHK)',
+      'Lakukan perundingan bipartit dengan karyawan',
+      'Dokumentasikan hasil kesepakatan/ketidaksepakatan bipartit'
+    ]},
+    { title:'Eskalasi (jika tidak sepakat)', items:[
+      'Laporkan perselisihan ke Disnaker setempat (mediasi/konsiliasi)',
+      'Siapkan dokumen pendukung untuk proses mediasi'
+    ]},
+    { title:'Penyelesaian & Administrasi', items:[
+      'Terbitkan surat keputusan PHK resmi',
+      'Proses pembayaran hak karyawan',
+      'Lapor pelaporan ketenagakerjaan (WLKP) ke Kemnaker',
+      'Nonaktifkan akses sistem, tarik aset perusahaan',
+      'Terbitkan surat keterangan kerja/referensi jika diminta',
+      'Update status karyawan di Talenta HRIS'
+    ]}
+  ],
+  checklistResign: [
+    { title:'Penerimaan Surat Resign', items:[
+      'Terima surat pengunduran diri tertulis dari karyawan',
+      'Konfirmasi tanggal efektif resign (notice period sesuai kontrak/PP)',
+      'Informasikan ke atasan langsung & tim terkait'
+    ]},
+    { title:'Selama Notice Period', items:[
+      'Susun rencana handover tugas & tanggung jawab',
+      'Identifikasi pengganti sementara/permanen',
+      'Jadwalkan exit interview'
+    ]},
+    { title:'Penyelesaian Administratif', items:[
+      'Hitung sisa cuti & Uang Pisah (jika berhak sesuai PP)',
+      'Proses pembayaran hak terakhir',
+      'Tarik aset perusahaan (ID card, laptop, dll)',
+      'Nonaktifkan akses sistem & Talenta HRIS'
+    ]},
+    { title:'Dokumentasi Akhir', items:[
+      'Terbitkan surat keterangan kerja/referensi',
+      'Update status karyawan di Talenta HRIS',
+      'Arsipkan dokumen resign'
+    ]}
+  ],
+  phkClState: {},
+  resignClState: {},
+  history: []
+};
+
+let saveTimer=null;
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveState, 500); }
+async function saveState(){
+  const formIds = ['phk_nama','phk_nik','phk_jabatan','phk_perusahaan','phk_mulai','phk_tgl','phk_alasan','phk_upah','phk_npwp','phk_cuti','phk_uphLain','phk_biayaPulangAktif','phk_biayaPulang','phk_uphAktif','phk_perumahanAktif',
+    'rs_nama','rs_nik','rs_jabatan','rs_perusahaan','rs_mulai','rs_tgl','rs_upah','rs_npwp','rs_pisahAktif','rs_cuti','rs_uphLain'];
+  const formData = {};
+  formIds.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    formData[id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  try{
+    localStorage.setItem('phk-resign-state', JSON.stringify({
+      reasonsPHK: state.reasonsPHK, pisahRows: state.pisahRows, pisahRowsMendesak: state.pisahRowsMendesak,
+      checklistPHK: state.checklistPHK, checklistResign: state.checklistResign,
+      phkClState: state.phkClState, resignClState: state.resignClState, formData
+    }));
+  }catch(e){}
+}
+async function loadState(){
+  try{ const raw = localStorage.getItem('phk-resign-state'); if(raw) return JSON.parse(raw); }catch(e){}
+  return null;
+}
+
+// ---------------- ADMIN: REASONS ----------------
+function renderReasonsAdmin(){
+  const tbody = document.getElementById('reasonsRows');
+  tbody.innerHTML = '';
+  state.reasonsPHK.forEach((r, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" value="${esc(r.label)}" data-idx="${idx}" data-f="label"></td>
+      <td><input type="number" step="0.05" value="${r.up}" data-idx="${idx}" data-f="up" ${r.usesPisah?'disabled':''}></td>
+      <td><input type="number" step="0.05" value="${r.upmk}" data-idx="${idx}" data-f="upmk" ${r.usesPisah?'disabled':''}></td>
+      <td style="text-align:center;"><input type="checkbox" data-idx="${idx}" data-f="usesPisah" ${r.usesPisah?'checked':''}></td>
+      <td>
+        <select data-idx="${idx}" data-f="pisahSource" ${r.usesPisah?'':'disabled'}>
+          <option value="umum" ${r.pisahSource!=='mendesak'?'selected':''}>Umum</option>
+          <option value="mendesak" ${r.pisahSource==='mendesak'?'selected':''}>Mendesak</option>
+        </select>
+      </td>
+      <td><button class="rm" data-idx="${idx}">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('input[type=text], input[type=number]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const idx=+inp.dataset.idx, f=inp.dataset.f;
+      state.reasonsPHK[idx][f] = f==='label' ? inp.value : (parseFloat(inp.value)||0);
+      scheduleSave(); rebuildPHKReasonDropdown();
+    });
+  });
+  tbody.querySelectorAll('input[type=checkbox]').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      const idx=+inp.dataset.idx;
+      state.reasonsPHK[idx].usesPisah = inp.checked;
+      renderReasonsAdmin(); scheduleSave(); rebuildPHKReasonDropdown();
+    });
+  });
+  tbody.querySelectorAll('select').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const idx=+sel.dataset.idx;
+      state.reasonsPHK[idx].pisahSource = sel.value;
+      scheduleSave(); rebuildPHKReasonDropdown();
+    });
+  });
+  tbody.querySelectorAll('.rm').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.reasonsPHK.splice(+btn.dataset.idx,1);
+      renderReasonsAdmin(); scheduleSave(); rebuildPHKReasonDropdown();
+    });
+  });
+}
+document.getElementById('addReasonRow').addEventListener('click', ()=>{
+  state.reasonsPHK.push({label:'Alasan baru', up:1, upmk:1, usesPisah:false, pisahSource:'umum'});
+  renderReasonsAdmin(); scheduleSave(); rebuildPHKReasonDropdown();
+});
+
+function rebuildPHKReasonDropdown(){
+  const sel = document.getElementById('phk_alasan');
+  const prevVal = sel.value;
+  sel.innerHTML = '';
+  state.reasonsPHK.forEach((r, idx)=>{
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = r.label + (r.usesPisah ? ` (Uang Pisah - ${r.pisahSource==='mendesak'?'Mendesak':'Umum'})` : ` (${r.up}x UP / ${r.upmk}x UPMK)`);
+    sel.appendChild(opt);
+  });
+  if(prevVal && +prevVal < state.reasonsPHK.length) sel.value = prevVal;
+  computePHK();
+}
+
+// ---------------- ADMIN: PISAH TABLES (umum & mendesak) ----------------
+function renderPisahTable(stateKey, tbodyId){
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = '';
+  state[stateKey].forEach((row, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="number" value="${row.from}" data-idx="${idx}" data-f="from"></td>
+      <td><input type="number" value="${row.to}" data-idx="${idx}" data-f="to"></td>
+      <td><input type="number" value="${row.months}" data-idx="${idx}" data-f="months"></td>
+      <td><button class="rm" data-idx="${idx}">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      state[stateKey][+inp.dataset.idx][inp.dataset.f] = parseFloat(inp.value)||0;
+      scheduleSave(); computePHK(); computeResign();
+    });
+  });
+  tbody.querySelectorAll('.rm').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state[stateKey].splice(+btn.dataset.idx,1);
+      renderPisahTable(stateKey, tbodyId); scheduleSave(); computePHK(); computeResign();
+    });
+  });
+}
+function renderPisahAdmin(){
+  renderPisahTable('pisahRows', 'pisahRowsAdmin');
+  renderPisahTable('pisahRowsMendesak', 'pisahRowsMendesakAdmin');
+}
+document.getElementById('addPisahRowAdmin').addEventListener('click', ()=>{
+  state.pisahRows.push({from:0,to:0,months:0});
+  renderPisahTable('pisahRows','pisahRowsAdmin'); scheduleSave();
+});
+document.getElementById('addPisahRowMendesakAdmin').addEventListener('click', ()=>{
+  state.pisahRowsMendesak.push({from:0,to:0,months:0});
+  renderPisahTable('pisahRowsMendesak','pisahRowsMendesakAdmin'); scheduleSave();
+});
+
+// ---------------- ADMIN: CHECKLIST EDITOR (generic) ----------------
+function renderChecklistEditor(stateKey, containerId){
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  state[stateKey].forEach((stage, si)=>{
+    const div = document.createElement('div');
+    div.style.cssText = 'border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;';
+    let itemsHTML = '';
+    stage.items.forEach((text, ii)=>{
+      itemsHTML += `
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <input type="text" value="${esc(text)}" data-si="${si}" data-ii="${ii}" class="cl-item-input" style="flex:1;padding:7px 9px;border:1px solid var(--line);border-radius:7px;font-size:12.5px;">
+          <button class="rm cl-item-rm" data-si="${si}" data-ii="${ii}">✕</button>
+        </div>`;
+    });
+    div.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+        <input type="text" value="${esc(stage.title)}" data-si="${si}" class="cl-stage-input" style="flex:1;padding:7px 9px;border:1px solid var(--line);border-radius:7px;font-size:13px;font-weight:700;">
+        <button class="rm cl-stage-rm" data-si="${si}">✕ Hapus Tahap</button>
+      </div>
+      ${itemsHTML}
+      <button class="add-row-btn cl-item-add" data-si="${si}" style="padding:5px 10px;font-size:12px;">+ Tambah item</button>
+    `;
+    container.appendChild(div);
+  });
+  container.querySelectorAll('.cl-stage-input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{ state[stateKey][+inp.dataset.si].title = inp.value; scheduleSave(); refreshChecklistLabels(); });
+  });
+  container.querySelectorAll('.cl-item-input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{ state[stateKey][+inp.dataset.si].items[+inp.dataset.ii] = inp.value; scheduleSave(); refreshChecklistLabels(); });
+  });
+  container.querySelectorAll('.cl-stage-rm').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state[stateKey].splice(+btn.dataset.si,1); renderChecklistEditor(stateKey, containerId); scheduleSave(); refreshChecklistLabels(); });
+  });
+  container.querySelectorAll('.cl-item-rm').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state[stateKey][+btn.dataset.si].items.splice(+btn.dataset.ii,1); renderChecklistEditor(stateKey, containerId); scheduleSave(); refreshChecklistLabels(); });
+  });
+  container.querySelectorAll('.cl-item-add').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state[stateKey][+btn.dataset.si].items.push('Item baru'); renderChecklistEditor(stateKey, containerId); scheduleSave(); refreshChecklistLabels(); });
+  });
+}
+document.getElementById('addStagePHK').addEventListener('click', ()=>{
+  state.checklistPHK.push({title:'Tahap Baru', items:['Item baru']});
+  renderChecklistEditor('checklistPHK','clEditor-phk'); scheduleSave(); refreshChecklistLabels();
+});
+document.getElementById('addStageResign').addEventListener('click', ()=>{
+  state.checklistResign.push({title:'Tahap Baru', items:['Item baru']});
+  renderChecklistEditor('checklistResign','clEditor-resign'); scheduleSave(); refreshChecklistLabels();
+});
+function refreshChecklistLabels(){ renderPHKChecklist(); renderResignChecklist(); }
+
+// ---------------- GENERIC CHECKLIST RENDER (for PHK/Resign tabs) ----------------
+function renderGenericChecklist(stages, clStateObj, bodyId, onChange){
+  const body = document.getElementById(bodyId);
+  body.innerHTML = '';
+  stages.forEach((stage, si)=>{
+    const div = document.createElement('div');
+    div.className = 'cl-stage';
+    let itemsHTML = '';
+    stage.items.forEach((text, ii)=>{
+      const key = si+'-'+ii;
+      const st = clStateObj[key] || {done:false, due:''};
+      itemsHTML += `
+        <div class="cl-item ${st.done?'done':''}">
+          <div class="box" data-key="${key}"></div>
+          <div class="txt">${text}</div>
+          <input type="text" class="due-input" data-key="${key}" placeholder="Catatan (opsional)" value="${esc(st.due)}">
+        </div>`;
+    });
+    div.innerHTML = `<div class="cl-stage-title"><span class="n">${String(si+1).padStart(2,'0')}</span> ${stage.title}</div>${itemsHTML}`;
+    body.appendChild(div);
+  });
+  body.querySelectorAll('.box').forEach(box=>{
+    box.addEventListener('click', ()=>{
+      const key = box.dataset.key;
+      clStateObj[key] = clStateObj[key] || {done:false, due:''};
+      clStateObj[key].done = !clStateObj[key].done;
+      renderGenericChecklist(stages, clStateObj, bodyId, onChange);
+      scheduleSave(); onChange();
+    });
+  });
+  body.querySelectorAll('.due-input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const key = inp.dataset.key;
+      clStateObj[key] = clStateObj[key] || {done:false, due:''};
+      clStateObj[key].due = inp.value;
+      scheduleSave(); onChange();
+    });
+  });
+}
+function renderPHKChecklist(){ renderGenericChecklist(state.checklistPHK, state.phkClState, 'phk_checklistBody', renderPHKDocPreview); }
+function renderResignChecklist(){ renderGenericChecklist(state.checklistResign, state.resignClState, 'rs_checklistBody', renderResignDocPreview); }
+
+// ================= PHK COMPUTE =================
+let phkCalc = {};
+function computePHK(){
+  const mulai = val('phk_mulai'), tgl = val('phk_tgl');
+  const months = calcMasaKerjaBulan(mulai, tgl);
+  const years = Math.floor(months/12), remMonths = months % 12;
+  document.getElementById('phk_masaKerjaDisplay').textContent = months>0 ? `Masa kerja: ${years} tahun ${remMonths} bulan` : 'Masa kerja: - (isi tanggal mulai & tanggal PHK)';
+
+  const upah = num('phk_upah');
+  const reasonIdx = +val('phk_alasan') || 0;
+  const r = state.reasonsPHK[reasonIdx] || state.reasonsPHK[0];
+  if(!r) return;
+  document.getElementById('phk_reasonNote').innerHTML = r.usesPisah
+    ? `<b>Alasan ini tidak mendapat Pesangon/Penghargaan menurut UU</b> — kompensasi mengikuti Uang Pisah${r.pisahSource==='mendesak' ? ' (tabel khusus pelanggaran mendesak)' : ' (tabel umum)'} sesuai Peraturan Perusahaan.`
+    : `<b>Faktor pengali:</b> ${r.up}× ketentuan Uang Pesangon, ${r.upmk}× ketentuan Uang Penghargaan.`;
+  document.getElementById('phk_pisahSection').style.display = r.usesPisah ? '' : 'none';
+  document.getElementById('phk_rowUP').style.display = r.usesPisah ? 'none' : '';
+  document.getElementById('phk_rowUPMK').style.display = r.usesPisah ? 'none' : '';
+  document.getElementById('phk_rowPisah').style.display = r.usesPisah ? '' : 'none';
+
+  let upNominal=0, upmkNominal=0, pisahNominal=0, upTier=0, upmkTier=0, pisahMonths=0;
+  if(r.usesPisah){
+    const pisahTable = r.pisahSource === 'mendesak' ? state.pisahRowsMendesak : state.pisahRows;
+    pisahMonths = getPisahMonths(months/12, pisahTable);
+    pisahNominal = pisahMonths * upah;
+    document.getElementById('phk_subPisah').textContent = `${pisahMonths} bulan upah × ${fmtRupiah(upah)}`;
+    document.getElementById('phk_valPisah').textContent = fmtRupiah(pisahNominal);
+  } else {
+    upTier = upTierBulan(months);
+    upmkTier = upmkTierBulan(months);
+    upNominal = r.up * upTier * upah;
+    upmkNominal = r.upmk * upmkTier * upah;
+    document.getElementById('phk_subUP').textContent = `${r.up}× × ${upTier} bulan upah`;
+    document.getElementById('phk_valUP').textContent = fmtRupiah(upNominal);
+    document.getElementById('phk_subUPMK').textContent = upmkTier>0 ? `${r.upmk}× × ${upmkTier} bulan upah` : 'Belum memenuhi syarat 3 tahun';
+    document.getElementById('phk_valUPMK').textContent = fmtRupiah(upmkNominal);
+  }
+  const subtotalPesangon = r.usesPisah ? pisahNominal : (upNominal+upmkNominal);
+  document.getElementById('phk_valSubtotalPesangon').textContent = fmtRupiah(subtotalPesangon);
+
+  const uphAktif = document.getElementById('phk_uphAktif').checked;
+  document.getElementById('phk_uphRowsWrap').style.display = uphAktif ? '' : 'none';
+  const cutiHari = uphAktif ? num('phk_cuti') : 0;
+  const cutiNominal = cutiHari * (upah/25);
+  const biayaPulangAktif = uphAktif && document.getElementById('phk_biayaPulangAktif').checked;
+  document.getElementById('phk_biayaPulangWrap').style.display = biayaPulangAktif ? '' : 'none';
+  document.getElementById('phk_rowBiayaPulang').style.display = biayaPulangAktif ? '' : 'none';
+  const biayaPulang = biayaPulangAktif ? num('phk_biayaPulang') : 0;
+  const lain = uphAktif ? num('phk_uphLain') : 0;
+  const perumahanAktif = uphAktif && document.getElementById('phk_perumahanAktif').checked;
+  document.getElementById('phk_rowPerumahan').style.display = perumahanAktif ? '' : 'none';
+  const perumahan = perumahanAktif ? subtotalPesangon * 0.15 : 0;
+  const uphTotal = uphAktif ? (cutiNominal+biayaPulang+perumahan+lain) : 0;
+
+  document.getElementById('phk_subCuti').textContent = `${cutiHari} hari × (${fmtRupiah(upah)} ÷ 25)`;
+  document.getElementById('phk_valCuti').textContent = fmtRupiah(cutiNominal);
+  document.getElementById('phk_valBiayaPulang').textContent = fmtRupiah(biayaPulang);
+  document.getElementById('phk_subPerumahan').textContent = `15% × ${fmtRupiah(subtotalPesangon)}`;
+  document.getElementById('phk_valPerumahan').textContent = fmtRupiah(perumahan);
+  document.getElementById('phk_valLain').textContent = fmtRupiah(lain);
+  document.getElementById('phk_valUPHTotal').textContent = fmtRupiah(uphTotal);
+
+  const bruto = subtotalPesangon + uphTotal;
+  const npwpStatus = val('phk_npwp');
+  const pajak = computePPhFinal(bruto, npwpStatus);
+  document.getElementById('phk_valBruto').textContent = fmtRupiah(bruto);
+  document.getElementById('phk_subPajak').textContent = npwpStatus==='tidak' ? 'Progresif +20% (tanpa NPWP)' : 'Progresif 0-25%';
+  document.getElementById('phk_valPajak').textContent = '– ' + fmtRupiah(pajak);
+  const netto = bruto - pajak;
+  document.getElementById('phk_valTotalNetto').textContent = fmtRupiah(netto);
+  document.getElementById('phk_checklistNameLabel').textContent = val('phk_nama') || 'Karyawan';
+
+  phkCalc = {months, years, remMonths, upah, r, upNominal, upmkNominal, pisahNominal, pisahMonths, upTier, upmkTier, subtotalPesangon, uphAktif, cutiHari, cutiNominal, biayaPulangAktif, biayaPulang, perumahanAktif, perumahan, lain, uphTotal, bruto, npwpStatus, pajak, netto};
+  renderPHKDocPreview();
+}
+['phk_nama','phk_nik','phk_jabatan','phk_perusahaan','phk_mulai','phk_tgl','phk_upah','phk_cuti','phk_uphLain','phk_biayaPulang'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', ()=>{ computePHK(); scheduleSave(); });
+});
+['phk_alasan','phk_npwp'].forEach(id=>document.getElementById(id).addEventListener('change', ()=>{ computePHK(); scheduleSave(); }));
+document.getElementById('phk_biayaPulangAktif').addEventListener('change', ()=>{ computePHK(); scheduleSave(); });
+document.getElementById('phk_perumahanAktif').addEventListener('change', ()=>{ computePHK(); scheduleSave(); });
+document.getElementById('phk_uphAktif').addEventListener('change', ()=>{ computePHK(); scheduleSave(); });
+
+function buildChecklistPrintHTML(stages, clStateObj, docTitle, nama){
+  const totalItems = stages.reduce((sum,s)=>sum+s.items.length,0);
+  const doneItems = Object.values(clStateObj).filter(v=>v.done).length;
+  let bodyRows = '';
+  stages.forEach((stage, si)=>{
+    bodyRows += `<tr class="p-cl-stage-row"><td colspan="4">${String(si+1).padStart(2,'0')} — ${stage.title}</td></tr>`;
+    stage.items.forEach((text, ii)=>{
+      const st = clStateObj[si+'-'+ii] || {done:false, due:''};
+      bodyRows += `
+        <tr>
+          <td class="p-cl-no">${ii+1}</td>
+          <td class="p-cl-status">${st.done?'✓':'—'}</td>
+          <td>${text}</td>
+          <td class="p-cl-note">${st.due||''}</td>
+        </tr>`;
+    });
+  });
+  return `
+    <div class="p-cl-cover">
+      <div>
+        <div class="name">${docTitle}</div>
+        <div style="font-size:11px;color:#6B7280;margin-top:2px;">${nama || 'Karyawan'}</div>
+      </div>
+      <div class="meta">Dicetak ${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>
+    </div>
+    <div class="p-cl-summary">Progres: <b>${doneItems} / ${totalItems}</b> item selesai dicentang</div>
+    <table class="p-cl-table">
+      <thead><tr><th>No</th><th>Status</th><th>Aktivitas</th><th>Catatan</th></tr></thead>
+      <tbody>${bodyRows}</tbody>
+    </table>
+  `;
+}
+
+function buildPHKDocHTML(){
+  const c = phkCalc;
+  if(!c.r) return '';
+  let rows = '';
+  if(c.r.usesPisah){
+    rows += `<tr><td>Uang Pisah</td><td>${c.pisahMonths} bulan upah</td><td class="num">${fmtRupiah(c.pisahNominal)}</td></tr>`;
+  } else {
+    rows += `<tr><td>Uang Pesangon</td><td>${c.r.up}× × ${c.upTier} bulan upah</td><td class="num">${fmtRupiah(c.upNominal)}</td></tr>`;
+    rows += `<tr><td>Uang Penghargaan Masa Kerja</td><td>${c.upmkTier>0?c.r.upmk+'× × '+c.upmkTier+' bulan upah':'Belum memenuhi syarat 3 th'}</td><td class="num">${fmtRupiah(c.upmkNominal)}</td></tr>`;
+  }
+  rows += `<tr class="p-subtotal"><td>Total Pesangon &amp; Penghargaan</td><td></td><td class="num">${fmtRupiah(c.subtotalPesangon)}</td></tr>`;
+  if(c.uphAktif){
+    rows += `<tr><td>Cuti belum diambil</td><td>${c.cutiHari} hari × upah/25</td><td class="num">${fmtRupiah(c.cutiNominal)}</td></tr>`;
+    if(c.biayaPulangAktif) rows += `<tr><td>Biaya pulang</td><td>—</td><td class="num">${fmtRupiah(c.biayaPulang)}</td></tr>`;
+    if(c.perumahanAktif) rows += `<tr><td>Perumahan & pengobatan (15%)</td><td>15% dasar</td><td class="num">${fmtRupiah(c.perumahan)}</td></tr>`;
+    if(c.lain) rows += `<tr><td>Lain-lain</td><td>—</td><td class="num">${fmtRupiah(c.lain)}</td></tr>`;
+    rows += `<tr class="p-subtotal"><td>Subtotal UPH</td><td></td><td class="num">${fmtRupiah(c.uphTotal)}</td></tr>`;
+  } else {
+    rows += `<tr><td colspan="2" style="color:#888;">UPH tidak disertakan</td><td class="num">Rp 0</td></tr>`;
+  }
+  rows += `<tr class="p-subtotal"><td>Total Kompensasi Bruto</td><td></td><td class="num">${fmtRupiah(c.bruto)}</td></tr>`;
+  rows += `<tr><td>PPh 21 Final</td><td>${c.npwpStatus==='tidak'?'Progresif +20%':'Progresif 0-25%'}</td><td class="num">– ${fmtRupiah(c.pajak)}</td></tr>`;
+  rows += `<tr class="p-total"><td>Total Diterima (Netto)</td><td></td><td class="num">${fmtRupiah(c.netto)}</td></tr>`;
+
+  const clHTML = buildChecklistPrintHTML(state.checklistPHK, state.phkClState, 'Checklist Proses PHK', val('phk_nama'));
+
+  return `
+    <p class="p-title">Rincian Perhitungan PHK</p>
+    <p class="p-sub">Dibuat pada ${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</p>
+    <table class="p-meta">
+      <tr><td class="k">Nama</td><td>${val('phk_nama')||'-'}</td></tr>
+      <tr><td class="k">NIK Karyawan</td><td>${val('phk_nik')||'-'}</td></tr>
+      <tr><td class="k">Jabatan</td><td>${val('phk_jabatan')||'-'}</td></tr>
+      <tr><td class="k">Perusahaan</td><td>${val('phk_perusahaan')||'-'}</td></tr>
+      <tr><td class="k">Masa Kerja</td><td>${c.months? c.years+' tahun '+c.remMonths+' bulan':'-'}</td></tr>
+      <tr><td class="k">Alasan PHK</td><td>${c.r.label}</td></tr>
+      <tr><td class="k">Upah</td><td>${fmtRupiah(c.upah)}</td></tr>
+      <tr><td class="k">Status NPWP</td><td>${c.npwpStatus==='tidak'?'Tidak Memiliki NPWP':'Memiliki NPWP'}</td></tr>
+    </table>
+    <h4 class="p-h4">Rincian Kompensasi</h4>
+    <table class="p-comp"><thead><tr><th>Komponen</th><th>Dasar</th><th style="text-align:right;">Nominal</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="p-disclaimer">Estimasi otomatis berdasarkan Pasal 40 &amp; 156 PP No. 35/2021 dan PP No. 68/2009. Wajib diverifikasi Legal/HC Manager/Payroll sebelum jadi dasar pembayaran resmi.</p>
+    <div class="p-page-break">${clHTML}</div>
+  `;
+}
+function renderPHKDocPreview(){ document.getElementById('phk_pdfPreview').innerHTML = buildPHKDocHTML(); }
+document.getElementById('phk_exportBtn').addEventListener('click', async ()=>{
+  const docHTML = buildPHKDocHTML();
+  document.getElementById('printDoc').innerHTML = docHTML;
+  await saveToHistory({
+    type:'PHK', nama: val('phk_nama')||'-', nik: val('phk_nik')||'-', jabatan: val('phk_jabatan')||'-',
+    perusahaan: val('phk_perusahaan')||'-', keterangan: phkCalc.r ? phkCalc.r.label : '-',
+    masaKerja: phkCalc.months ? `${phkCalc.years} th ${phkCalc.remMonths} bln` : '-',
+    bruto: phkCalc.bruto||0, netto: phkCalc.netto||0, docHTML
+  });
+  window.print();
+});
+
+// ================= RESIGN COMPUTE =================
+let resignCalc = {};
+function computeResign(){
+  const mulai = val('rs_mulai'), tgl = val('rs_tgl');
+  const months = calcMasaKerjaBulan(mulai, tgl);
+  const years = Math.floor(months/12), remMonths = months % 12;
+  document.getElementById('rs_masaKerjaDisplay').textContent = months>0 ? `Masa kerja: ${years} tahun ${remMonths} bulan` : 'Masa kerja: - (isi tanggal mulai & tanggal resign)';
+
+  const upah = num('rs_upah');
+  const pisahAktif = document.getElementById('rs_pisahAktif').checked;
+  document.getElementById('rs_rowPisah').style.display = pisahAktif ? '' : 'none';
+  let pisahNominal = 0, pisahMonths = 0;
+  if(pisahAktif){
+    pisahMonths = getPisahMonths(months/12);
+    pisahNominal = pisahMonths * upah;
+    document.getElementById('rs_subPisah').textContent = `${pisahMonths} bulan upah × ${fmtRupiah(upah)}`;
+    document.getElementById('rs_valPisah').textContent = fmtRupiah(pisahNominal);
+  }
+
+  const cutiHari = num('rs_cuti');
+  const cutiNominal = cutiHari * (upah/25);
+  const lain = num('rs_uphLain');
+  const uphTotal = cutiNominal + lain;
+  document.getElementById('rs_subCuti').textContent = `${cutiHari} hari × (${fmtRupiah(upah)} ÷ 25)`;
+  document.getElementById('rs_valCuti').textContent = fmtRupiah(cutiNominal);
+  document.getElementById('rs_valLain').textContent = fmtRupiah(lain);
+  document.getElementById('rs_valUPHTotal').textContent = fmtRupiah(uphTotal);
+
+  const bruto = pisahNominal + uphTotal;
+  const npwpStatus = val('rs_npwp');
+  const pajak = computePPhFinal(bruto, npwpStatus);
+  document.getElementById('rs_valBruto').textContent = fmtRupiah(bruto);
+  document.getElementById('rs_subPajak').textContent = npwpStatus==='tidak' ? 'Progresif +20% (tanpa NPWP)' : 'Progresif 0-25%';
+  document.getElementById('rs_valPajak').textContent = '– ' + fmtRupiah(pajak);
+  const netto = bruto - pajak;
+  document.getElementById('rs_valTotalNetto').textContent = fmtRupiah(netto);
+  document.getElementById('rs_checklistNameLabel').textContent = val('rs_nama') || 'Karyawan';
+
+  resignCalc = {months, years, remMonths, upah, pisahAktif, pisahNominal, pisahMonths, cutiHari, cutiNominal, lain, uphTotal, bruto, npwpStatus, pajak, netto};
+  renderResignDocPreview();
+}
+['rs_nama','rs_nik','rs_jabatan','rs_perusahaan','rs_mulai','rs_tgl','rs_upah','rs_cuti','rs_uphLain'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', ()=>{ computeResign(); scheduleSave(); });
+});
+document.getElementById('rs_npwp').addEventListener('change', ()=>{ computeResign(); scheduleSave(); });
+document.getElementById('rs_pisahAktif').addEventListener('change', ()=>{ computeResign(); scheduleSave(); });
+
+function buildResignDocHTML(){
+  const c = resignCalc;
+  let rows = '';
+  if(c.pisahAktif) rows += `<tr><td>Uang Pisah</td><td>${c.pisahMonths} bulan upah</td><td class="num">${fmtRupiah(c.pisahNominal)}</td></tr>`;
+  rows += `<tr><td>Cuti belum diambil</td><td>${c.cutiHari} hari × upah/25</td><td class="num">${fmtRupiah(c.cutiNominal)}</td></tr>`;
+  if(c.lain) rows += `<tr><td>Lain-lain</td><td>—</td><td class="num">${fmtRupiah(c.lain)}</td></tr>`;
+  rows += `<tr class="p-subtotal"><td>Total Kompensasi Bruto</td><td></td><td class="num">${fmtRupiah(c.bruto)}</td></tr>`;
+  rows += `<tr><td>PPh 21 Final</td><td>${c.npwpStatus==='tidak'?'Progresif +20%':'Progresif 0-25%'}</td><td class="num">– ${fmtRupiah(c.pajak)}</td></tr>`;
+  rows += `<tr class="p-total"><td>Total Diterima (Netto)</td><td></td><td class="num">${fmtRupiah(c.netto)}</td></tr>`;
+
+  const clHTML = buildChecklistPrintHTML(state.checklistResign, state.resignClState, 'Checklist Proses Resign', val('rs_nama'));
+
+  return `
+    <p class="p-title">Rincian Perhitungan Resign</p>
+    <p class="p-sub">Dibuat pada ${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</p>
+    <table class="p-meta">
+      <tr><td class="k">Nama</td><td>${val('rs_nama')||'-'}</td></tr>
+      <tr><td class="k">NIK Karyawan</td><td>${val('rs_nik')||'-'}</td></tr>
+      <tr><td class="k">Jabatan</td><td>${val('rs_jabatan')||'-'}</td></tr>
+      <tr><td class="k">Perusahaan</td><td>${val('rs_perusahaan')||'-'}</td></tr>
+      <tr><td class="k">Masa Kerja</td><td>${c.months? c.years+' tahun '+c.remMonths+' bulan':'-'}</td></tr>
+      <tr><td class="k">Upah</td><td>${fmtRupiah(c.upah)}</td></tr>
+      <tr><td class="k">Status NPWP</td><td>${c.npwpStatus==='tidak'?'Tidak Memiliki NPWP':'Memiliki NPWP'}</td></tr>
+    </table>
+    <h4 class="p-h4">Rincian Kompensasi</h4>
+    <table class="p-comp"><thead><tr><th>Komponen</th><th>Dasar</th><th style="text-align:right;">Nominal</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="p-disclaimer">Uang Pisah adalah kebijakan Peraturan Perusahaan, bukan ketentuan pemerintah. Estimasi ini wajib diverifikasi Legal/HC Manager/Payroll sebelum jadi dasar pembayaran resmi.</p>
+    <div class="p-page-break">${clHTML}</div>
+  `;
+}
+function renderResignDocPreview(){ document.getElementById('rs_pdfPreview').innerHTML = buildResignDocHTML(); }
+document.getElementById('rs_exportBtn').addEventListener('click', async ()=>{
+  const docHTML = buildResignDocHTML();
+  document.getElementById('printDoc').innerHTML = docHTML;
+  await saveToHistory({
+    type:'Resign', nama: val('rs_nama')||'-', nik: val('rs_nik')||'-', jabatan: val('rs_jabatan')||'-',
+    perusahaan: val('rs_perusahaan')||'-', keterangan: resignCalc.pisahAktif ? 'Berhak Uang Pisah' : 'Tanpa Uang Pisah',
+    masaKerja: resignCalc.months ? `${resignCalc.years} th ${resignCalc.remMonths} bln` : '-',
+    bruto: resignCalc.bruto||0, netto: resignCalc.netto||0, docHTML
+  });
+  window.print();
+});
+
+// ================= RIWAYAT (Netlify Blobs) =================
+const HISTORY_API = '/api/history';
+let historyLoading = false;
+
+async function loadHistoryFromServer(){
+  historyLoading = true;
+  try{
+    const res = await fetch(HISTORY_API);
+    if(res.ok){ state.history = await res.json(); }
+    else { console.error('Gagal memuat riwayat, status', res.status); }
+  }catch(e){
+    console.error('Gagal memuat riwayat', e);
+  }
+  historyLoading = false;
+}
+
+async function saveToHistory(record){
+  try{
+    const res = await fetch(HISTORY_API, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(record)
+    });
+    if(res.ok){
+      const saved = await res.json();
+      state.history.unshift(saved);
+    } else {
+      alert('Gagal menyimpan ke riwayat server. PDF tetap akan dibuat, tapi tidak tersimpan di Riwayat.');
+    }
+  }catch(e){
+    alert('Gagal menyimpan ke riwayat server (cek koneksi). PDF tetap akan dibuat.');
+  }
+}
+
+async function deleteHistoryItem(id){
+  try{ await fetch(`${HISTORY_API}?id=${encodeURIComponent(id)}`, {method:'DELETE'}); }catch(e){}
+}
+async function clearAllHistoryServer(){
+  try{ await fetch(`${HISTORY_API}?id=all`, {method:'DELETE'}); }catch(e){}
+}
+
+function renderRiwayat(){
+  const container = document.getElementById('riwayatList');
+  if(historyLoading){
+    container.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Memuat riwayat...</p>';
+    return;
+  }
+  if(state.history.length === 0){
+    container.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Belum ada riwayat. Riwayat akan otomatis muncul setiap ada yang klik "Export ke PDF" di tab PHK atau Resign.</p>';
+    return;
+  }
+  let html = '<div style="overflow-x:auto;"><table class="edit-table riwayat-table" style="table-layout:auto;"><thead><tr><th>Tanggal</th><th>Nama</th><th>Jenis</th><th>Masa Kerja</th><th>Total Diterima</th><th></th></tr></thead><tbody>';
+  state.history.forEach(rec=>{
+    const tgl = new Date(rec.timestamp).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+    html += `<tr>
+      <td style="white-space:nowrap;color:var(--muted);">${tgl}</td>
+      <td style="font-weight:600;">${rec.nama}</td>
+      <td><span style="font-family:'Plus Jakarta Sans';font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${rec.type==='PHK'?'#F6E7E5':'#E7F0EA'};color:${rec.type==='PHK'?'#B0483F':'#4C7A5D'};">${rec.type}</span></td>
+      <td style="white-space:nowrap;">${rec.masaKerja}</td>
+      <td style="white-space:nowrap;font-weight:600;">${fmtRupiah(rec.netto)}</td>
+      <td style="white-space:nowrap;">
+        <button class="add-row-btn riwayat-view" data-id="${rec.id}" style="padding:5px 9px;font-size:11.5px;">Lihat/Cetak</button>
+        <button class="rm riwayat-del" data-id="${rec.id}">✕</button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  container.innerHTML = html;
+
+  container.querySelectorAll('.riwayat-view').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const rec = state.history.find(r=>r.id===btn.dataset.id);
+      if(!rec) return;
+      document.getElementById('printDoc').innerHTML = rec.docHTML;
+      window.print();
+    });
+  });
+  container.querySelectorAll('.riwayat-del').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      btn.disabled = true;
+      await deleteHistoryItem(btn.dataset.id);
+      state.history = state.history.filter(r=>r.id!==btn.dataset.id);
+      renderRiwayat();
+    });
+  });
+}
+
+document.getElementById('refreshHistoryBtn').addEventListener('click', async ()=>{
+  renderRiwayat();
+  await loadHistoryFromServer();
+  renderRiwayat();
+});
+
+document.getElementById('clearHistoryBtn').addEventListener('click', async ()=>{
+  if(state.history.length===0) return;
+  if(confirm('Hapus semua riwayat untuk seluruh tim? Tindakan ini tidak bisa dibatalkan.')){
+    await clearAllHistoryServer();
+    state.history = [];
+    renderRiwayat();
+  }
+});
+
+document.getElementById('downloadCsvBtn').addEventListener('click', ()=>{
+  if(state.history.length===0){ alert('Belum ada riwayat untuk didownload.'); return; }
+  const headers = ['Tanggal','Jenis','Nama','NIK','Jabatan','Perusahaan','Masa Kerja','Keterangan','Total Bruto','Total Netto'];
+  const csvRows = [headers.join(',')];
+  state.history.forEach(rec=>{
+    const tgl = new Date(rec.timestamp).toLocaleDateString('id-ID');
+    const row = [tgl, rec.type, rec.nama, rec.nik, rec.jabatan, rec.perusahaan, rec.masaKerja, rec.keterangan, rec.bruto, rec.netto]
+      .map(v => `"${String(v).replace(/"/g,'""')}"`);
+    csvRows.push(row.join(','));
+  });
+  const csvContent = '\uFEFF' + csvRows.join('\n');
+  const blob = new Blob([csvContent], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `riwayat-phk-resign-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('downloadAllPdfBtn').addEventListener('click', async ()=>{
+  if(state.history.length===0){ alert('Belum ada riwayat untuk didownload.'); return; }
+  const btn = document.getElementById('downloadAllPdfBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  const zip = new JSZip();
+  try{
+    for(let i=0; i<state.history.length; i++){
+      const rec = state.history[i];
+      btn.textContent = `Memproses ${i+1}/${state.history.length}...`;
+      const container = document.createElement('div');
+      container.style.cssText = 'position:fixed;left:0;top:0;width:800px;background:#fff;padding:26px 30px;z-index:-9999;opacity:1;';
+      container.innerHTML = rec.docHTML;
+      document.body.appendChild(container);
+      const pdfBlob = await html2pdf()
+        .set({
+          margin: 0,
+          filename: 'doc.pdf',
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+          jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'] }
+        })
+        .from(container)
+        .outputPdf('blob');
+      document.body.removeChild(container);
+      if(!pdfBlob || pdfBlob.size < 100){
+        throw new Error(`Gagal membuat PDF untuk ${rec.nama} (hasil kosong)`);
+      }
+      const tglSlug = new Date(rec.timestamp).toISOString().slice(0,10);
+      const safeName = `${rec.type}-${rec.nama}-${tglSlug}`.replace(/[^a-z0-9\-_]/gi,'_');
+      zip.file(`${safeName}.pdf`, pdfBlob);
+    }
+    btn.textContent = 'Membungkus ZIP...';
+    const zipBlob = await zip.generateAsync({type:'blob'});
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `riwayat-pdf-${new Date().toISOString().slice(0,10)}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }catch(e){
+    alert('Gagal membuat ZIP PDF: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = originalText;
+});
+
+// ---------------- INIT ----------------
+(async function init(){
+  const saved = await loadState();
+  if(saved){
+    if(saved.reasonsPHK) state.reasonsPHK = saved.reasonsPHK.map(r=>{
+      if(r.pisahSource) return r;
+      const isMendesak = r.usesPisah && /mendesak|kesalahan berat/i.test(r.label||'');
+      return { ...r, pisahSource: isMendesak ? 'mendesak' : 'umum' };
+    });
+    if(saved.pisahRows) state.pisahRows = saved.pisahRows;
+    if(saved.pisahRowsMendesak) state.pisahRowsMendesak = saved.pisahRowsMendesak;
+    if(saved.checklistPHK) state.checklistPHK = saved.checklistPHK;
+    if(saved.checklistResign) state.checklistResign = saved.checklistResign;
+    if(saved.phkClState) state.phkClState = saved.phkClState;
+    if(saved.resignClState) state.resignClState = saved.resignClState;
+    if(saved.formData){
+      Object.keys(saved.formData).forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(el.type === 'checkbox') el.checked = saved.formData[id];
+        else el.value = saved.formData[id];
+      });
+    }
+  }
+  rebuildPHKReasonDropdown();
+  renderReasonsAdmin();
+  renderPisahAdmin();
+  renderChecklistEditor('checklistPHK','clEditor-phk');
+  renderChecklistEditor('checklistResign','clEditor-resign');
+  renderPHKChecklist();
+  renderResignChecklist();
+  computePHK();
+  computeResign();
+})();
+</script>
+</body>
+</html>
