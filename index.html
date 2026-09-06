@@ -30,9 +30,29 @@
   .maintabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;}
   .maintabs button{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;}
   .maintabs button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .tab-badge{display:inline-block;background:var(--gold);color:#1A1D29;border-radius:10px;padding:1px 7px;font-size:10.5px;font-weight:800;margin-left:5px;vertical-align:1px;}
 
   .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px;width:100%;}
   .card h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 14px;font-weight:700;}
+  .card-header-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .card-header-row h2{margin:0;}
+  .mini-btn{font-size:11.5px;font-weight:700;color:var(--slate);background:none;border:1px dashed var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+  .mini-btn:hover{background:var(--bg);}
+  .checklist-progress-note{text-transform:none;font-weight:700;color:var(--slate);font-size:12px;letter-spacing:0;}
+
+  .case-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:#fff;}
+  .case-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+  .case-name{font-weight:700;font-size:13.5px;color:var(--navy);}
+  .case-current{font-size:10px;font-weight:800;color:var(--good);background:var(--good-bg);padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.03em;}
+  .case-meta{font-size:11.5px;color:var(--muted);margin-bottom:9px;}
+  .progress-bar-wrap{background:#EEF1F5;border-radius:8px;height:8px;overflow:hidden;margin-bottom:6px;}
+  .progress-bar-fill{background:var(--gold);height:100%;border-radius:8px;transition:width .25s;}
+  .progress-bar-fill.complete{background:var(--good);}
+  .progress-label{font-size:11px;color:var(--slate);font-weight:700;margin-bottom:11px;}
+  .case-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .badge{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:10px;text-transform:uppercase;letter-spacing:.02em;}
+  .badge-phk{background:var(--bad-bg);color:var(--bad);}
+  .badge-resign{background:var(--good-bg);color:var(--good);}
 
   .frow2{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;}
   @media (max-width:540px){.frow2{grid-template-columns:1fr;}}
@@ -148,6 +168,7 @@
   <div class="maintabs">
     <button class="main-tab active" data-tab="phk">PHK</button>
     <button class="main-tab" data-tab="resign">Resign</button>
+    <button class="main-tab" data-tab="progress">📋 Progress<span id="progressCountBadge" class="tab-badge" style="display:none;"></span></button>
     <button class="main-tab" data-tab="riwayat">📜 Riwayat</button>
     <button class="main-tab" data-tab="admin">⚙ Panel Admin</button>
   </div>
@@ -155,7 +176,10 @@
   <!-- ================= PHK TAB ================= -->
   <div id="tab-phk">
     <div class="card">
-      <h2>Data Karyawan</h2>
+      <div class="card-header-row">
+        <h2 style="margin:0;">Data Karyawan</h2>
+        <button class="mini-btn" id="phkNewCaseBtn">+ Kasus Baru</button>
+      </div>
       <div class="frow2">
         <div class="fgroup"><label>Nama</label><input type="text" id="phk_nama" placeholder="Nama karyawan"></div>
         <div class="fgroup"><label>NIK Karyawan</label><input type="text" id="phk_nik" placeholder="NIK"></div>
@@ -232,7 +256,7 @@
     </div>
 
     <div class="card">
-      <h2>Checklist Proses PHK — <span id="phk_checklistNameLabel">Karyawan</span></h2>
+      <h2>Checklist Proses PHK — <span id="phk_checklistNameLabel">Karyawan</span><span id="phk_checklistProgress" class="checklist-progress-note"></span></h2>
       <div id="phk_checklistBody"></div>
     </div>
 
@@ -246,7 +270,10 @@
   <!-- ================= RESIGN TAB ================= -->
   <div id="tab-resign" style="display:none;">
     <div class="card">
-      <h2>Data Karyawan</h2>
+      <div class="card-header-row">
+        <h2 style="margin:0;">Data Karyawan</h2>
+        <button class="mini-btn" id="rsNewCaseBtn">+ Kasus Baru</button>
+      </div>
       <div class="frow2">
         <div class="fgroup"><label>Nama</label><input type="text" id="rs_nama" placeholder="Nama karyawan"></div>
         <div class="fgroup"><label>NIK Karyawan</label><input type="text" id="rs_nik" placeholder="NIK"></div>
@@ -299,7 +326,7 @@
     </div>
 
     <div class="card">
-      <h2>Checklist Proses Resign — <span id="rs_checklistNameLabel">Karyawan</span></h2>
+      <h2>Checklist Proses Resign — <span id="rs_checklistNameLabel">Karyawan</span><span id="rs_checklistProgress" class="checklist-progress-note"></span></h2>
       <div id="rs_checklistBody"></div>
     </div>
 
@@ -308,6 +335,18 @@
       <div id="rs_pdfPreview" style="background:#fff;padding:26px 22px;max-height:560px;overflow-y:auto;font-size:12.5px;line-height:1.6;color:#1A1D29;"></div>
     </div>
     <div class="actions"><button class="btn btn-gold" id="rs_exportBtn">Export ke PDF</button></div>
+  </div>
+
+  <!-- ================= PROGRESS TAB ================= -->
+  <div id="tab-progress" style="display:none;">
+    <div class="card">
+      <div class="card-header-row">
+        <h2 style="margin:0;">Proses Berjalan</h2>
+        <button class="mini-btn" id="refreshProgressBtn">↻ Refresh</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin:-6px 0 14px;">Setiap kali kamu isi form atau centang checklist di tab PHK/Resign, progresnya otomatis tersimpan di server — bisa dilanjutkan kapan saja dari device manapun, tanpa harus Export PDF dulu. Begitu kamu klik "Export ke PDF", kasus itu dianggap selesai dan otomatis pindah ke tab Riwayat.</p>
+      <div id="progressList"></div>
+    </div>
   </div>
 
   <!-- ================= RIWAYAT TAB ================= -->
@@ -392,11 +431,16 @@ document.querySelectorAll('.main-tab').forEach(btn=>{
     btn.classList.add('active');
     document.getElementById('tab-phk').style.display = btn.dataset.tab==='phk' ? '' : 'none';
     document.getElementById('tab-resign').style.display = btn.dataset.tab==='resign' ? '' : 'none';
+    document.getElementById('tab-progress').style.display = btn.dataset.tab==='progress' ? '' : 'none';
     document.getElementById('tab-riwayat').style.display = btn.dataset.tab==='riwayat' ? '' : 'none';
     document.getElementById('tab-admin').style.display = btn.dataset.tab==='admin' ? '' : 'none';
     if(btn.dataset.tab === 'riwayat'){
       renderRiwayat();
       loadHistoryFromServer().then(renderRiwayat);
+    }
+    if(btn.dataset.tab === 'progress'){
+      renderProgress();
+      loadCasesFromServer().then(()=>{ renderProgress(); updateProgressBadge(); });
     }
   });
 });
@@ -520,8 +564,56 @@ let state = {
   ],
   phkClState: {},
   resignClState: {},
-  history: []
+  history: [],
+  cases: [],
+  phkActiveCaseId: null,
+  resignActiveCaseId: null
 };
+
+const PHK_FIELD_IDS = ['phk_nama','phk_nik','phk_jabatan','phk_perusahaan','phk_mulai','phk_tgl','phk_alasan','phk_upah','phk_npwp','phk_cuti','phk_uphLain','phk_biayaPulangAktif','phk_biayaPulang','phk_uphAktif','phk_perumahanAktif'];
+const RS_FIELD_IDS = ['rs_nama','rs_nik','rs_jabatan','rs_perusahaan','rs_mulai','rs_tgl','rs_upah','rs_npwp','rs_pisahAktif','rs_cuti','rs_uphLain'];
+
+function collectFieldData(ids){
+  const data = {};
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    data[id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  return data;
+}
+function applyFieldData(ids, data){
+  if(!data) return;
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el || !(id in data)) return;
+    if(el.type === 'checkbox') el.checked = data[id];
+    else el.value = data[id];
+  });
+}
+function genCaseId(){ return 'c' + Date.now() + Math.random().toString(36).slice(2,8); }
+function checklistProgress(stages, clStateObj){
+  let total = 0, done = 0;
+  stages.forEach((stage, si)=>{
+    stage.items.forEach((_, ii)=>{
+      total++;
+      if((clStateObj[si+'-'+ii]||{}).done) done++;
+    });
+  });
+  return {total, done};
+}
+function timeAgo(iso){
+  if(!iso) return '-';
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diffMs/60000);
+  if(min < 1) return 'Baru saja';
+  if(min < 60) return `${min} menit lalu`;
+  const hr = Math.floor(min/60);
+  if(hr < 24) return `${hr} jam lalu`;
+  const day = Math.floor(hr/24);
+  if(day < 30) return `${day} hari lalu`;
+  return new Date(iso).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+}
 
 let saveTimer=null;
 function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveState, 500); }
@@ -538,7 +630,8 @@ async function saveState(){
     localStorage.setItem('phk-resign-state', JSON.stringify({
       reasonsPHK: state.reasonsPHK, pisahRows: state.pisahRows, pisahRowsMendesak: state.pisahRowsMendesak,
       checklistPHK: state.checklistPHK, checklistResign: state.checklistResign,
-      phkClState: state.phkClState, resignClState: state.resignClState, formData
+      phkClState: state.phkClState, resignClState: state.resignClState, formData,
+      phkActiveCaseId: state.phkActiveCaseId, resignActiveCaseId: state.resignActiveCaseId
     }));
   }catch(e){}
 }
@@ -744,8 +837,28 @@ function renderGenericChecklist(stages, clStateObj, bodyId, onChange){
     });
   });
 }
-function renderPHKChecklist(){ renderGenericChecklist(state.checklistPHK, state.phkClState, 'phk_checklistBody', renderPHKDocPreview); }
-function renderResignChecklist(){ renderGenericChecklist(state.checklistResign, state.resignClState, 'rs_checklistBody', renderResignDocPreview); }
+function updatePHKChecklistBadge(){
+  const {total, done} = checklistProgress(state.checklistPHK, state.phkClState);
+  const badge = document.getElementById('phk_checklistProgress');
+  if(badge) badge.textContent = total>0 ? ` — ${done}/${total} selesai (${Math.round(done/total*100)}%)` : '';
+}
+function updateResignChecklistBadge(){
+  const {total, done} = checklistProgress(state.checklistResign, state.resignClState);
+  const badge = document.getElementById('rs_checklistProgress');
+  if(badge) badge.textContent = total>0 ? ` — ${done}/${total} selesai (${Math.round(done/total*100)}%)` : '';
+}
+function renderPHKChecklist(){
+  renderGenericChecklist(state.checklistPHK, state.phkClState, 'phk_checklistBody', ()=>{
+    renderPHKDocPreview(); scheduleCaseSavePHK(); updatePHKChecklistBadge();
+  });
+  updatePHKChecklistBadge();
+}
+function renderResignChecklist(){
+  renderGenericChecklist(state.checklistResign, state.resignClState, 'rs_checklistBody', ()=>{
+    renderResignDocPreview(); scheduleCaseSaveRS(); updateResignChecklistBadge();
+  });
+  updateResignChecklistBadge();
+}
 
 // ================= PHK COMPUTE =================
 let phkCalc = {};
@@ -823,12 +936,12 @@ function computePHK(){
   renderPHKDocPreview();
 }
 ['phk_nama','phk_nik','phk_jabatan','phk_perusahaan','phk_mulai','phk_tgl','phk_upah','phk_cuti','phk_uphLain','phk_biayaPulang'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', ()=>{ computePHK(); scheduleSave(); });
+  document.getElementById(id).addEventListener('input', ()=>{ computePHK(); scheduleSave(); scheduleCaseSavePHK(); });
 });
-['phk_alasan','phk_npwp'].forEach(id=>document.getElementById(id).addEventListener('change', ()=>{ computePHK(); scheduleSave(); }));
-document.getElementById('phk_biayaPulangAktif').addEventListener('change', ()=>{ computePHK(); scheduleSave(); });
-document.getElementById('phk_perumahanAktif').addEventListener('change', ()=>{ computePHK(); scheduleSave(); });
-document.getElementById('phk_uphAktif').addEventListener('change', ()=>{ computePHK(); scheduleSave(); });
+['phk_alasan','phk_npwp'].forEach(id=>document.getElementById(id).addEventListener('change', ()=>{ computePHK(); scheduleSave(); scheduleCaseSavePHK(); }));
+document.getElementById('phk_biayaPulangAktif').addEventListener('change', ()=>{ computePHK(); scheduleSave(); scheduleCaseSavePHK(); });
+document.getElementById('phk_perumahanAktif').addEventListener('change', ()=>{ computePHK(); scheduleSave(); scheduleCaseSavePHK(); });
+document.getElementById('phk_uphAktif').addEventListener('change', ()=>{ computePHK(); scheduleSave(); scheduleCaseSavePHK(); });
 
 function buildChecklistPrintHTML(stages, clStateObj, docTitle, nama){
   const totalItems = stages.reduce((sum,s)=>sum+s.items.length,0);
@@ -918,6 +1031,13 @@ document.getElementById('phk_exportBtn').addEventListener('click', async ()=>{
     masaKerja: phkCalc.months ? `${phkCalc.years} th ${phkCalc.remMonths} bln` : '-',
     bruto: phkCalc.bruto||0, netto: phkCalc.netto||0, docHTML
   });
+  if(state.phkActiveCaseId){
+    await deleteCaseServer(state.phkActiveCaseId);
+    state.cases = state.cases.filter(c=>c.id!==state.phkActiveCaseId);
+    state.phkActiveCaseId = null;
+    updateProgressBadge();
+    if(document.getElementById('tab-progress').style.display !== 'none') renderProgress();
+  }
   window.print();
 });
 
@@ -963,10 +1083,10 @@ function computeResign(){
   renderResignDocPreview();
 }
 ['rs_nama','rs_nik','rs_jabatan','rs_perusahaan','rs_mulai','rs_tgl','rs_upah','rs_cuti','rs_uphLain'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', ()=>{ computeResign(); scheduleSave(); });
+  document.getElementById(id).addEventListener('input', ()=>{ computeResign(); scheduleSave(); scheduleCaseSaveRS(); });
 });
-document.getElementById('rs_npwp').addEventListener('change', ()=>{ computeResign(); scheduleSave(); });
-document.getElementById('rs_pisahAktif').addEventListener('change', ()=>{ computeResign(); scheduleSave(); });
+document.getElementById('rs_npwp').addEventListener('change', ()=>{ computeResign(); scheduleSave(); scheduleCaseSaveRS(); });
+document.getElementById('rs_pisahAktif').addEventListener('change', ()=>{ computeResign(); scheduleSave(); scheduleCaseSaveRS(); });
 
 function buildResignDocHTML(){
   const c = resignCalc;
@@ -1008,6 +1128,13 @@ document.getElementById('rs_exportBtn').addEventListener('click', async ()=>{
     masaKerja: resignCalc.months ? `${resignCalc.years} th ${resignCalc.remMonths} bln` : '-',
     bruto: resignCalc.bruto||0, netto: resignCalc.netto||0, docHTML
   });
+  if(state.resignActiveCaseId){
+    await deleteCaseServer(state.resignActiveCaseId);
+    state.cases = state.cases.filter(c=>c.id!==state.resignActiveCaseId);
+    state.resignActiveCaseId = null;
+    updateProgressBadge();
+    if(document.getElementById('tab-progress').style.display !== 'none') renderProgress();
+  }
   window.print();
 });
 
@@ -1051,6 +1178,190 @@ async function deleteHistoryItem(id){
 async function clearAllHistoryServer(){
   try{ await fetch(`${HISTORY_API}?id=all`, {method:'DELETE'}); }catch(e){}
 }
+
+// ================= PROGRESS / KASUS BERJALAN (Netlify Blobs) =================
+const CASES_API = '/api/cases';
+let casesLoading = false;
+let caseSaveTimerPHK = null, caseSaveTimerRS = null;
+
+function hasMeaningfulPHKData(){ return !!(val('phk_nama').trim() || val('phk_jabatan').trim()); }
+function hasMeaningfulResignData(){ return !!(val('rs_nama').trim() || val('rs_jabatan').trim()); }
+
+function scheduleCaseSavePHK(){ clearTimeout(caseSaveTimerPHK); caseSaveTimerPHK = setTimeout(saveCasePHK, 900); }
+function scheduleCaseSaveRS(){ clearTimeout(caseSaveTimerRS); caseSaveTimerRS = setTimeout(saveCaseResign, 900); }
+
+async function saveCasePHK(){
+  if(!hasMeaningfulPHKData()) return;
+  if(!state.phkActiveCaseId) state.phkActiveCaseId = genCaseId();
+  const {total, done} = checklistProgress(state.checklistPHK, state.phkClState);
+  const record = {
+    id: state.phkActiveCaseId, type:'PHK',
+    nama: val('phk_nama') || '(Tanpa nama)', jabatan: val('phk_jabatan') || '-', perusahaan: val('phk_perusahaan') || '-',
+    formData: collectFieldData(PHK_FIELD_IDS), clState: state.phkClState,
+    totalItems: total, doneItems: done
+  };
+  try{
+    const res = await fetch(CASES_API, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(record)});
+    if(res.ok){ upsertLocalCase(await res.json()); }
+  }catch(e){ console.error('Gagal menyimpan progress PHK', e); }
+}
+async function saveCaseResign(){
+  if(!hasMeaningfulResignData()) return;
+  if(!state.resignActiveCaseId) state.resignActiveCaseId = genCaseId();
+  const {total, done} = checklistProgress(state.checklistResign, state.resignClState);
+  const record = {
+    id: state.resignActiveCaseId, type:'Resign',
+    nama: val('rs_nama') || '(Tanpa nama)', jabatan: val('rs_jabatan') || '-', perusahaan: val('rs_perusahaan') || '-',
+    formData: collectFieldData(RS_FIELD_IDS), clState: state.resignClState,
+    totalItems: total, doneItems: done
+  };
+  try{
+    const res = await fetch(CASES_API, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(record)});
+    if(res.ok){ upsertLocalCase(await res.json()); }
+  }catch(e){ console.error('Gagal menyimpan progress Resign', e); }
+}
+
+function upsertLocalCase(rec){
+  const idx = state.cases.findIndex(c=>c.id===rec.id);
+  if(idx>=0) state.cases[idx] = rec; else state.cases.unshift(rec);
+  updateProgressBadge();
+  if(document.getElementById('tab-progress').style.display !== 'none') renderProgress();
+}
+
+async function loadCasesFromServer(){
+  casesLoading = true;
+  try{
+    const res = await fetch(CASES_API);
+    if(res.ok){ state.cases = await res.json(); }
+    else { console.error('Gagal memuat progress, status', res.status); }
+  }catch(e){
+    console.error('Gagal memuat progress', e);
+  }
+  casesLoading = false;
+}
+async function deleteCaseServer(id){
+  try{ await fetch(`${CASES_API}?id=${encodeURIComponent(id)}`, {method:'DELETE'}); }catch(e){}
+}
+
+function updateProgressBadge(){
+  const badge = document.getElementById('progressCountBadge');
+  if(!badge) return;
+  const n = state.cases.length;
+  if(n > 0){ badge.textContent = n; badge.style.display = 'inline-block'; }
+  else { badge.style.display = 'none'; }
+}
+
+function renderProgress(){
+  const container = document.getElementById('progressList');
+  if(casesLoading){
+    container.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Memuat progress...</p>';
+    return;
+  }
+  if(state.cases.length === 0){
+    container.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Belum ada proses berjalan. Mulai isi form di tab PHK atau Resign — progresnya akan otomatis muncul di sini.</p>';
+    return;
+  }
+  let html = '';
+  state.cases.forEach(c=>{
+    const pct = c.totalItems > 0 ? Math.round((c.doneItems / c.totalItems) * 100) : 0;
+    const isActive = (c.type==='PHK' && c.id===state.phkActiveCaseId) || (c.type==='Resign' && c.id===state.resignActiveCaseId);
+    const metaParts = [c.jabatan && c.jabatan!=='-' ? c.jabatan : null, c.perusahaan && c.perusahaan!=='-' ? c.perusahaan : null].filter(Boolean);
+    html += `
+    <div class="case-card">
+      <div class="case-card-top">
+        <span class="badge ${c.type==='PHK'?'badge-phk':'badge-resign'}">${c.type}</span>
+        <span class="case-name">${esc(c.nama)}</span>
+        ${isActive ? '<span class="case-current">Sedang dibuka</span>' : ''}
+      </div>
+      <div class="case-meta">${metaParts.map(esc).join(' · ')}${metaParts.length?' · ':''}diupdate ${timeAgo(c.updatedAt)}</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill${pct>=100?' complete':''}" style="width:${pct}%;"></div></div>
+      <div class="progress-label">${c.doneItems}/${c.totalItems} item checklist selesai (${pct}%)${pct>=100?' — siap di-export & masuk Riwayat':''}</div>
+      <div class="case-actions">
+        <button class="add-row-btn case-continue" data-id="${c.id}" style="padding:6px 12px;font-size:12px;">▶ Lanjutkan</button>
+        <button class="rm case-delete" data-id="${c.id}">✕ Hapus</button>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  container.querySelectorAll('.case-continue').forEach(btn=>{
+    btn.addEventListener('click', ()=> continueCase(btn.dataset.id));
+  });
+  container.querySelectorAll('.case-delete').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm('Hapus progress ini? Form & checklist yang sudah tersimpan untuk kasus ini akan hilang.')) return;
+      btn.disabled = true;
+      await deleteCaseServer(btn.dataset.id);
+      if(state.phkActiveCaseId === btn.dataset.id) state.phkActiveCaseId = null;
+      if(state.resignActiveCaseId === btn.dataset.id) state.resignActiveCaseId = null;
+      state.cases = state.cases.filter(c=>c.id!==btn.dataset.id);
+      renderProgress(); updateProgressBadge();
+    });
+  });
+}
+
+function continueCase(id){
+  const c = state.cases.find(x=>x.id===id);
+  if(!c) return;
+  if(c.type === 'PHK'){
+    applyFieldData(PHK_FIELD_IDS, c.formData);
+    state.phkClState = c.clState || {};
+    state.phkActiveCaseId = c.id;
+    document.querySelector('.main-tab[data-tab="phk"]').click();
+    renderPHKChecklist();
+    computePHK();
+  } else {
+    applyFieldData(RS_FIELD_IDS, c.formData);
+    state.resignClState = c.clState || {};
+    state.resignActiveCaseId = c.id;
+    document.querySelector('.main-tab[data-tab="resign"]').click();
+    renderResignChecklist();
+    computeResign();
+  }
+  scheduleSave();
+}
+
+function resetPHKForm(){
+  PHK_FIELD_IDS.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(el.type === 'checkbox') el.checked = (id==='phk_uphAktif' || id==='phk_perumahanAktif');
+    else el.value = '';
+  });
+  document.getElementById('phk_alasan').selectedIndex = 0;
+  document.getElementById('phk_npwp').value = 'ada';
+  state.phkClState = {};
+  state.phkActiveCaseId = null;
+  renderPHKChecklist();
+  computePHK();
+  scheduleSave();
+}
+function resetResignForm(){
+  RS_FIELD_IDS.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(el.type === 'checkbox') el.checked = (id==='rs_pisahAktif');
+    else el.value = '';
+  });
+  document.getElementById('rs_npwp').value = 'ada';
+  state.resignClState = {};
+  state.resignActiveCaseId = null;
+  renderResignChecklist();
+  computeResign();
+  scheduleSave();
+}
+document.getElementById('phkNewCaseBtn').addEventListener('click', ()=>{
+  if(hasMeaningfulPHKData() && !confirm('Mulai kasus PHK baru? Form saat ini akan dikosongkan. Progress yang sudah tersimpan tetap aman dan bisa dilanjutkan lagi dari tab Progress.')) return;
+  resetPHKForm();
+});
+document.getElementById('rsNewCaseBtn').addEventListener('click', ()=>{
+  if(hasMeaningfulResignData() && !confirm('Mulai kasus Resign baru? Form saat ini akan dikosongkan. Progress yang sudah tersimpan tetap aman dan bisa dilanjutkan lagi dari tab Progress.')) return;
+  resetResignForm();
+});
+document.getElementById('refreshProgressBtn').addEventListener('click', async ()=>{
+  renderProgress();
+  await loadCasesFromServer();
+  renderProgress(); updateProgressBadge();
+});
 
 function renderRiwayat(){
   const container = document.getElementById('riwayatList');
@@ -1199,6 +1510,8 @@ document.getElementById('downloadAllPdfBtn').addEventListener('click', async ()=
     if(saved.checklistResign) state.checklistResign = saved.checklistResign;
     if(saved.phkClState) state.phkClState = saved.phkClState;
     if(saved.resignClState) state.resignClState = saved.resignClState;
+    if(saved.phkActiveCaseId) state.phkActiveCaseId = saved.phkActiveCaseId;
+    if(saved.resignActiveCaseId) state.resignActiveCaseId = saved.resignActiveCaseId;
     if(saved.formData){
       Object.keys(saved.formData).forEach(id=>{
         const el = document.getElementById(id);
@@ -1217,6 +1530,10 @@ document.getElementById('downloadAllPdfBtn').addEventListener('click', async ()=
   renderResignChecklist();
   computePHK();
   computeResign();
+  loadCasesFromServer().then(()=>{
+    updateProgressBadge();
+    if(document.getElementById('tab-progress').style.display !== 'none') renderProgress();
+  });
 })();
 </script>
 </body>

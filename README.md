@@ -5,6 +5,7 @@ Tool HR internal untuk menghitung kompensasi Pemutusan Hubungan Kerja (PHK) dan 
 ## Fitur
 - **Tab PHK**: hitung Uang Pesangon, Uang Penghargaan Masa Kerja, Uang Penggantian Hak (tiap komponen bisa on/off), dan PPh 21 Final — otomatis dari data karyawan.
 - **Tab Resign**: hitung Uang Pisah (opsional) dan Uang Penggantian Hak untuk kasus pengunduran diri.
+- **Tab Progress**: karena proses PHK/resign biasanya tidak selesai dalam satu hari, setiap kali kamu mengisi form atau mencentang checklist di tab PHK/Resign, progresnya otomatis tersimpan ke server (Netlify Blobs) — lengkap dengan berapa item checklist yang sudah/belum selesai. Bisa dibuka & dilanjutkan kapan saja, dari device manapun, **tanpa harus Export PDF dulu**. Begitu kasus di-export ke PDF, otomatis dianggap selesai dan pindah ke tab Riwayat.
 - **Tab Riwayat**: setiap export PDF otomatis tersimpan ke server (Netlify Blobs), sehingga bisa dilihat/diunduh ulang oleh siapapun di tim yang membuka link ini — bukan cuma tersimpan di satu browser.
   - Download seluruh riwayat sebagai **CSV** (untuk direkap di Excel)
   - Download seluruh riwayat sebagai **ZIP berisi PDF** per karyawan
@@ -14,7 +15,8 @@ Tool HR internal untuk menghitung kompensasi Pemutusan Hubungan Kerja (PHK) dan 
 ## Struktur Proyek
 ```
 index.html                     -> aplikasi utama (frontend)
-netlify/functions/history.js   -> Netlify Function untuk simpan/ambil riwayat (Netlify Blobs)
+netlify/functions/history.js   -> Netlify Function untuk simpan/ambil riwayat final (Netlify Blobs)
+netlify/functions/cases.js     -> Netlify Function untuk simpan/ambil progress/kasus berjalan (Netlify Blobs)
 netlify.toml                   -> konfigurasi build & functions
 package.json                   -> dependency @netlify/blobs
 ```
