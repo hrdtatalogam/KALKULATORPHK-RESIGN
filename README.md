@@ -36,3 +36,19 @@ Fitur Riwayat butuh Netlify Functions + Netlify Blobs, jadi deploy-nya lewat **G
 Perhitungan mengacu pada Pasal 40 & 156 PP No. 35 Tahun 2021 (turunan UU Cipta Kerja) dan PP No. 68/2009 (PPh 21 Final atas pesangon). Nominal Uang Pisah mengikuti kebijakan internal perusahaan (bukan ketentuan pemerintah) dan bisa diatur di Panel Admin.
 
 Semua hasil perhitungan bersifat estimasi dan wajib diverifikasi oleh Legal/HC Manager/Payroll sebelum digunakan sebagai dasar pembayaran resmi.
+
+## Update UI/UX (terbaru)
+- Tampilan diperhalus dengan animasi & transisi (masuk-tab, hover tombol, checklist ter-centang, progress bar) yang tetap menghormati pengaturan "reduce motion" di device.
+- Notifikasi kini pakai toast (bukan popup alert bawaan browser) untuk pengalaman yang lebih halus.
+- Tab **Progress**: daftar kasus berjalan sekarang dipaginasi (5 kasus per halaman) supaya tidak memanjang ke bawah — ada tombol Sebelumnya/Berikutnya di bawah daftar.
+- Tab **Riwayat**: setiap baris kini punya tombol **✎ Edit** — klik untuk memuat ulang data kasus itu ke form PHK/Resign, edit, lalu Export ulang untuk menyimpan versi terbarunya (kasus lama tetap ada di Riwayat, jadi versi baru akan jadi entri terpisah). Catatan: data lama yang sudah ada di Riwayat sebelum update ini belum menyimpan detail form, jadi tombol Edit untuk entri lama akan memberi tahu bahwa datanya tidak tersedia — entri baru setelah update ini semua sudah bisa di-edit.
+
+## Pemisahan Perhitungan & Checklist
+- Di tab PHK & Resign, setelah "Data Karyawan" ada 2 sub-halaman: **📊 Perhitungan** dan **✅ Checklist** (lengkap dengan preview PDF masing-masing).
+- **Export Perhitungan ke PDF** → hanya mencetak perhitungan; kasus dianggap selesai & masuk Riwayat (snapshot checklist ikut tersimpan).
+- **Export Checklist ke PDF** → mencetak checklist saja, kapan saja, tanpa menyelesaikan kasus.
+- Riwayat: tombol terpisah 📊 Perhitungan dan ✅ Checklist. Entri lama (format lama) tetap bisa dicetak sebagai perhitungan.
+
+## Tampilan responsif
+- Desktop (≥1024px): layout 2 kolom di tab PHK/Resign (input di kiri, hasil/checklist di kanan), daftar Progress 2 kolom.
+- Mobile (≤640px): satu kolom, tab menu grid 3 kolom, tombol besar, Riwayat tampil sebagai kartu per baris.
