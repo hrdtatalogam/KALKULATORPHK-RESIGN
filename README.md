@@ -58,3 +58,8 @@ Semua hasil perhitungan bersifat estimasi dan wajib diverifikasi oleh Legal/HC M
 - Hero gelap dengan grid, glow, dan grafik animasi; tab sticky efek kaca; kartu "Total Diterima" menonjol.
 - Logo Tatalogam Group (`logo.png`) tampil di header, footer, favicon, dan kop PDF. Pastikan `logo.png` ikut ter-push ke repo (satu folder dengan `index.html`).
 - Animasi menghormati pengaturan "reduce motion".
+
+## Update: input Rupiah, dropdown perusahaan, preview popup
+- Kolom nominal (Upah, Komponen Lain UPH, Biaya Pulang) otomatis berformat `Rp 5.000.000,-` saat diketik. Data lama (angka mentah) otomatis ikut diformat saat dibuka.
+- Perusahaan kini dropdown. Isi daftarnya di **Panel Admin → Perusahaan** (tambah/ubah/hapus), atau ubah default `state.companies` di `index.html`. Daftar disimpan di browser (seperti pengaturan Admin lainnya). Kasus lama dengan nama perusahaan di luar daftar tetap tampil apa adanya.
+- Preview PDF dipindah ke tombol **Preview PDF** (popup). Halaman utama hanya berisi Data Karyawan dan Hasil Perhitungan/Checklist. Popup bisa ditutup dengan tombol X, Esc, atau klik area gelap, dan punya tombol Export.
